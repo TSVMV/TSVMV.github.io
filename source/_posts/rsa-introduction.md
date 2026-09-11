@@ -3,6 +3,7 @@ title: RSA 算法详解：从原理到实践
 date: 2026-09-11 20:35:00
 categories: [密码学]
 tags: [RSA, 加密, CTF, 数学]
+cover: /img/bg2.jpg
 ---
 
 ## 什么是 RSA？
