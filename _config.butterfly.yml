@@ -66,16 +66,16 @@ avatar:
 disable_top_img: false
 
 # If the banner of page not setting, it will show the default_top_img
-default_top_img: /img/banner.jpg
+default_top_img: /img/banner2.jpg
 
 # The banner image of index page
 index_img: /img/banner.jpg
 
 # The banner image of archive page
-archive_img:
+archive_img: /img/bg4.jpg
 
 # Note: tag page, not tags page
-tag_img:
+tag_img: /img/bg6.jpg
 
 # The banner image of tag page, you can set the banner image for each tag
 # Format:
@@ -83,7 +83,7 @@ tag_img:
 tag_per_img:
 
 # Note: category page, not categories page
-category_img:
+category_img: /img/bg5.jpg
 
 # The banner image of category page, you can set the banner image for each category
 # Format:
@@ -540,7 +540,7 @@ comments:
   # Leave it empty if you don't need comments
   # Choose: Disqus/Disqusjs/Livere/Gitalk/Valine/Waline/Utterances/Facebook Comments/Twikoo/Giscus/Remark42/Artalk
   # Format of two comments system : Disqus,Waline
-  use:
+  use: Giscus
   # Display the comment name next to the button
   text: true
   # Lazyload: The comment system will be load when comment element enters the browser's viewport.
@@ -637,9 +637,9 @@ twikoo:
 # Giscus
 # https://giscus.app/
 giscus:
-  repo:
-  repo_id:
-  category_id:
+  repo: TSVMV/TSVMV.github.io
+  repo_id: R_kgDOUWyk2g
+  category_id: DIC_kwDOUWyk2s4DFaWQ
   light_theme: light
   dark_theme: dark
   js:

@@ -3,7 +3,7 @@ title: Linux 基础命令入门：从零开始掌握终端
 date: 2026-09-11 20:40:00
 categories: [Linux]
 tags: [Linux, 命令行, 运维, 入门]
-cover: /img/banner.jpg
+cover: /img/bg2.jpg
 ---
 
 ## 为什么要学 Linux 命令行？

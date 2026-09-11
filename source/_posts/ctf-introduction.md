@@ -3,7 +3,7 @@ title: CTF 入门指南：什么是网络安全夺旗赛？
 date: 2026-09-11 20:45:00
 categories: [CTF]
 tags: [CTF, 网络安全, Web, 密码学, 逆向, Pwn]
-cover: /img/bg.jpg
+cover: /img/bg4.jpg
 ---
 
 ## 什么是 CTF？
