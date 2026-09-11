@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: TSVMV 的博客
+title: VMV 的博客
 subtitle: 记录生活与技术
-description: 一个基于 Hexo + Next 主题搭建的个人博客
-keywords: 博客,技术,生活
-author: TSVMV
+description: 一个基于 Hexo + Butterfly 主题搭建的个人博客
+keywords: 博客,技术,生活,CTF
+author: VMV
 language: zh-CN
 timezone: Asia/Shanghai
 
@@ -96,7 +96,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: next
+theme: butterfly
 
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
