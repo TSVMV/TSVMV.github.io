@@ -4,6 +4,7 @@ date: 2026-09-11 21:00:00
 categories: [CTF, Writeup]
 tags: [CTF, GFCTF, Web, Pwn, Reverse, Crypto, WP]
 cover: /img/banner.jpg
+top: true
 ---
 
 ## 比赛概况

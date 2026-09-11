@@ -48,6 +48,8 @@ code_blocks:
 #   icon: link || the description || color
 social:
   fab fa-github: https://github.com/TSVMV || Github || '#24292e'
+  fab fa-tiktok: https://www.douyin.com/@VMV_SRC || 抖音 || '#000000'
+  fab fa-qq: https://qm.qq.com/q/VMVflag || QQ || '#12b7f5'
   fas fa-envelope: mailto:3347123386@qq.com || Email || '#4a7dbe'
 
 # --------------------------------------
@@ -163,7 +165,7 @@ subtitle:
   # 1 - hitokoto.cn
   # 2 - https://api.aa1.cn/doc/yiyan.html
   # 3 - jinrishici.com
-  source: 1
+  source: false
   # If you close the typewriter effect, the subtitle will only show the first line of sub
   sub:
     - 热爱技术，热爱生活
@@ -806,7 +808,7 @@ preloader:
   # source
   # 1. fullpage-loading
   # 2. pace (progress bar)
-  source: 1
+  source: 2
   # pace theme (see https://codebyzach.github.io/pace/)
   pace_css_url:
 
@@ -1050,10 +1052,7 @@ Open_Graph_meta:
 # Structured Data
 # https://developers.google.com/search/docs/guides/intro-structured-data
 structured_data:
-  enable: true
-  # Alternate name for the site, used in structured data
-  # Format: ['name1', 'name2']
-  alternate_name: VMV的博客
+  enable: false
 
 # Add the vendor prefixes to ensure compatibility
 css_prefix: true

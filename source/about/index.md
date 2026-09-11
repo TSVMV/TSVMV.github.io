@@ -23,6 +23,8 @@ date: 2026-09-11 20:30:38
 ## 联系方式
 
 - GitHub: [TSVMV](https://github.com/TSVMV)
+- 抖音: [@VMV_SRC](https://www.douyin.com/@VMV_SRC)
+- QQ: VMVflag（[点击添加](https://qm.qq.com/q/VMVflag)）
 - 邮箱: 3347123386@qq.com
 
 如果你对我的文章有任何想法或建议，欢迎留言交流！
