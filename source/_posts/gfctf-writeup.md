@@ -1,5 +1,5 @@
 ---
-title: GFCTF  Writeup — 队伍 vov 排名 #21
+title: GFCTF WP
 date: 2026-09-11 21:00:00
 categories: [CTF, Writeup]
 tags: [CTF, GFCTF, Web, Pwn, Reverse, Crypto, WP]
