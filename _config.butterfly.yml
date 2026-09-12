@@ -291,7 +291,7 @@ aside:
     category: true
   card_author:
     enable: true
-    description: 初中生 | CTF | AI | Linux | 运维 | 编程
+    description: 初中生 | CTF出题人 | 安全工具与AI Agent开发者
     button:
       enable: true
       icon: fab fa-github
