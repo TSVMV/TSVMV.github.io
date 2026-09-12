@@ -3,7 +3,7 @@ title: 大模型推理讲解—量化、KV缓存与推理加速技术深度解�
 date: 2026-09-12 17:00:00
 categories: [AI, 大模型]
 tags: [AI, 大模型, 推理优化]
-cover: /img/bg11.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg11.jpg
 ---
 
 ## 大模型推理的挑战

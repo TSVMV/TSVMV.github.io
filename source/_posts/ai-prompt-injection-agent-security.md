@@ -3,7 +3,7 @@ title: 提示注入讲解—大模型间接提示注入与 Agent 安全
 date: 2026-09-13 01:00:00
 categories: [AI安全, 大模型]
 tags: [AI, 大模型, AI安全]
-cover: /img/bg4.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg4.jpg
 ---
 
 ## 问题的本质

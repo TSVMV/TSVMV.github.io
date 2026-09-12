@@ -11,7 +11,7 @@
 
 nav:
   # Navigation bar logo image
-  logo: /img/favicon.png
+  logo: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/favicon.png
   display_title: true
   display_post_title: true
   # Whether to fix navigation bar
@@ -56,26 +56,26 @@ social:
 # Image Settings
 # --------------------------------------
 
-favicon: /img/favicon.png
+favicon: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/favicon.png
 
 avatar:
-  img: /images/avatar.jpg
+  img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/images/avatar.jpg
   effect: false
 
 # Disable all banner images
 disable_top_img: false
 
 # If the banner of page not setting, it will show the default_top_img
-default_top_img: /img/banner2.jpg
+default_top_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/banner2.jpg
 
 # The banner image of index page
-index_img: /img/banner.jpg
+index_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/banner.jpg
 
 # The banner image of archive page
-archive_img: /img/bg4.jpg
+archive_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg4.jpg
 
 # Note: tag page, not tags page
-tag_img: /img/bg6.jpg
+tag_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg6.jpg
 
 # The banner image of tag page, you can set the banner image for each tag
 # Format:
@@ -83,7 +83,7 @@ tag_img: /img/bg6.jpg
 tag_per_img:
 
 # Note: category page, not categories page
-category_img: /img/bg5.jpg
+category_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg5.jpg
 
 # The banner image of category page, you can set the banner image for each category
 # Format:
@@ -96,7 +96,7 @@ footer_img: false
 # Website Background
 # Can set it to color, image URL or an array containing colors and/or image URLs
 # If an array is provided, a random background will be selected from the array on each load
-background: /img/bg.jpg
+background: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg.jpg
 
 cover:
   # Disable the cover or not
@@ -109,14 +109,14 @@ cover:
 
 # Replace Broken Images
 error_img:
-  flink: /img/friend_404.gif
-  post_page: /img/404.jpg
+  flink: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg21.jpg
+  post_page: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg22.jpg
 
 # A simple 404 page
 error_404:
   enable: true
   subtitle: 'Page Not Found'
-  background: /img/banner.jpg
+  background: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/banner.jpg
 
 post_meta:
   # Home Page

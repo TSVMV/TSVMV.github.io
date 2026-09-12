@@ -3,7 +3,7 @@ title: GFCTF WP
 date: 2026-09-11 21:00:00
 categories: [CTF, Writeup]
 tags: [CTF, WP]
-cover: /img/banner3.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/banner3.jpg
 ---
 
 ## 比赛概况

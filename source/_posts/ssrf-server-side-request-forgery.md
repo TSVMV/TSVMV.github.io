@@ -3,7 +3,7 @@ title: SSRF讲解—高级利用技术与云环境逃逸
 date: 2026-09-12 21:00:00
 categories: [Web安全, CTF]
 tags: [Web安全, SSRF, CTF]
-cover: /img/bg15.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg15.jpg
 ---
 
 ## SSRF 的进阶视角

@@ -3,7 +3,7 @@ title: XSS讲解—高级利用技术与CSP深度绕过
 date: 2026-09-12 20:00:00
 categories: [Web安全, CTF]
 tags: [Web安全, XSS, CTF]
-cover: /img/bg14.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg14.jpg
 ---
 
 ## XSS 的进阶视角

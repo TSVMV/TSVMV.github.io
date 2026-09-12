@@ -3,7 +3,7 @@ title: Linux性能讲解—系统性能分析与调优实战
 date: 2026-09-11 20:40:00
 categories: [Linux, 运维]
 tags: [Linux, 运维, 性能调优]
-cover: /img/bg8.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg8.jpg
 ---
 
 ## 性能分析的方法论
