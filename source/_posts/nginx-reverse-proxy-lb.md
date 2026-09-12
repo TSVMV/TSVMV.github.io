@@ -1,490 +1,514 @@
 ---
-title: Nginx 反向代理与负载均衡实战
+title: Nginx讲解—高性能Web服务器架构与深度调优
 date: 2026-09-12 15:00:00
 categories: [运维, Web服务器]
-tags: [Nginx, 反向代理, 负载均衡, 运维, HTTPS]
-cover: /img/bg8.jpg
+tags: [Nginx, 性能调优, 反向代理, 负载均衡, 内核参数]
+cover: /img/bg4.jpg
 ---
 
-## Nginx 是什么
+## Nginx 的架构本质
 
-Nginx（发音 engine-x）是一个高性能的 HTTP 和反向代理服务器，由 Igor Sysoev 于 2004 年发布。它以事件驱动的异步非阻塞架构著称，能在单机上支撑数万甚至数十万的并发连接，是目前全球使用最广泛的 Web 服务器之一。
+Nginx 的高性能不是偶然的，而是基于三个核心架构设计：
 
-Nginx 的典型用途：
+1. **事件驱动的异步非阻塞模型**：一个 worker 进程用 epoll 处理数万并发连接，不需要为每个连接创建线程
+2. **多进程 + 单线程 worker**：master 进程管理 worker，worker 进程单线程处理请求，避免锁竞争
+3. **请求处理阶段化**：把请求处理分成 11 个阶段（POST_READ、SERVER_REWRITE、FIND_CONFIG、REWRITE、POST_REWRITE、PREACCESS、ACCESS、POST_ACCESS、PRECONTENT、CONTENT、LOG），每个模块可以在不同阶段介入
 
-- **静态文件服务**：直接提供 HTML、CSS、JS、图片等静态资源
-- **反向代理**：把请求转发给后端应用服务器（Node.js、Python、Java 等）
-- **负载均衡**：把流量分发到多个后端实例
-- **HTTPS 终端**：SSL/TLS 卸载，后端不用管加密
-- **缓存**：缓存静态资源和后端响应，减轻后端压力
-- **限流与访问控制**：限制请求速率、IP 黑白名单
+理解 Nginx 的关键是理解**它为什么快**——不是因为它用了什么黑科技，而是因为它避免了传统 Web 服务器（Apache prefork）的性能杀手：线程/进程创建开销、上下文切换、锁竞争、阻塞 IO。
 
 <!-- more -->
 
-## 安装与基础配置
+## 事件驱动模型深度解析
 
-### Ubuntu 安装
-
-```bash
-sudo apt-get update
-sudo apt-get install nginx
-
-# 管理服务
-sudo systemctl start nginx
-sudo systemctl enable nginx    # 开机自启
-sudo systemctl reload nginx    # 重载配置（不中断服务）
-sudo nginx -t                   # 测试配置文件语法
-```
-
-### 配置文件结构
+### worker 进程的工作循环
 
 ```
-/etc/nginx/
-├── nginx.conf              # 主配置文件
-├── conf.d/                 # 额外配置目录（*.conf 会被自动包含）
-├── sites-available/        # 可用站点配置
-└── sites-enabled/          # 已启用站点（通常是 sites-available 的软链接）
+while (true) {
+    // 1. 处理事件（epoll_wait 返回的就绪事件）
+    events = epoll_wait(epfd, event_list, max_events, timeout);
+    
+    // 2. 逐个处理事件
+    for each event in events:
+        if (event is new connection):
+            accept() → 创建新连接 → 注册到 epoll
+        if (event is readable):
+            读取请求 → 处理 → 生成响应
+        if (event is writable):
+            发送响应数据
+        if (event is timer):
+            处理超时事件
+    
+    // 3. 处理定时器（红黑树管理的定时器）
+    expire_timers();
+}
 ```
 
-主配置文件 `nginx.conf` 的核心结构：
+关键：worker 进程永远不会阻塞——所有 IO 都是非阻塞的，等待 IO 时可以处理其他连接。这就是为什么一个 worker 能处理数万并发连接。
+
+### epoll 的优势
+
+Nginx 在 Linux 上使用 epoll 作为事件通知机制。相比传统的 select/poll：
+
+- **select**：最多 1024 个文件描述符，每次调用都要拷贝整个 fd 集合，O(n) 遍历
+- **poll**：没有 1024 限制，但仍然是 O(n) 遍历
+- **epoll**：用红黑树管理 fd，就绪事件用链表存储，O(1) 插入/删除，只返回就绪事件，不需要遍历所有 fd
+
+epoll 的两个模式：
+- **LT（Level Triggered，水平触发）**：只要 fd 就绪，每次 epoll_wait 都会返回。Nginx 默认用 LT，更安全
+- **ET（Edge Triggered，边缘触发）**：只在状态变化时返回一次。性能更好，但需要一次性读完所有数据，否则可能丢失事件
+
+### 惊群问题与解决
+
+当多个 worker 进程都在监听同一个端口时，新连接到来会唤醒所有 worker（惊群），但只有一个能 accept 成功，其他被无谓唤醒。
+
+Nginx 的解决：
+1. **accept_mutex**（旧方案）：worker 进程竞争一个互斥锁，只有拿到锁的 worker 才把监听 fd 加入 epoll
+2. **SO_REUSEPORT**（新方案，Linux 3.9+）：内核层面的负载均衡，每个 worker 绑定同一个端口，内核自动把连接分配给不同的 worker。性能更好，已成为默认
+
+## 性能调优的层次
+
+### 第一层：worker 进程与连接
 
 ```nginx
-user www-data;
-worker_processes auto;          # 工作进程数，auto 等于 CPU 核心数
-pid /run/nginx.pid;
+# worker 进程数，auto 等于 CPU 核心数
+worker_processes auto;
+
+# 绑定 CPU 核心（减少上下文切换和缓存失效）
+worker_cpu_affinity auto;
+
+# 每个 worker 的最大文件描述符
+worker_rlimit_nofile 65535;
 
 events {
-    worker_connections 1024;   # 每个工作进程的最大连接数
-    use epoll;                  # Linux 下用 epoll 事件模型
-    multi_accept on;            # 一次接受多个新连接
-}
-
-http {
-    include /etc/nginx/mime.types;
-    default_type application/octet-stream;
-
-    # 日志格式
-    log_format main '$remote_addr - $remote_user [$time_local] '
-                    '"$request" $status $body_bytes_sent '
-                    '"$http_referer" "$http_user_agent"';
-
-    access_log /var/log/nginx/access.log main;
-    error_log /var/log/nginx/error.log warn;
-
-    sendfile on;                # 高效文件传输
-    tcp_nopush on;
-    tcp_nodelay on;
-    keepalive_timeout 65;      # 长连接超时
-    gzip on;                    # 开启 gzip 压缩
-
-    include /etc/nginx/conf.d/*.conf;
-    include /etc/nginx/sites-enabled/*;
-}
-```
-
-## 反向代理
-
-反向代理是 Nginx 最常用的功能。客户端请求 Nginx，Nginx 把请求转发给后端服务，再把响应返回给客户端。客户端不知道后端服务的存在，Nginx 是唯一的入口。
-
-### 基础反向代理配置
-
-```nginx
-server {
-    listen 80;
-    server_name example.com;
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;   # 后端服务地址
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-### 关键代理头说明
-
-| 头 | 作用 |
-|----|------|
-| `Host` | 原始请求的主机名，后端需要用它做虚拟主机匹配 |
-| `X-Real-IP` | 客户端真实 IP |
-| `X-Forwarded-For` | 经过的代理链，每经过一个代理追加一个 IP |
-| `X-Forwarded-Proto` | 原始请求协议（http/https），后端据此生成正确的 URL |
-
-### 代理超时与缓冲
-
-```nginx
-location / {
-    proxy_pass http://backend;
-
-    # 超时设置
-    proxy_connect_timeout 10s;    # 连接后端超时
-    proxy_send_timeout 30s;        # 发送请求给后端超时
-    proxy_read_timeout 60s;        # 读取后端响应超时
-
-    # 缓冲设置
-    proxy_buffering on;
-    proxy_buffer_size 4k;
-    proxy_buffers 8 4k;
-    proxy_busy_buffers_size 8k;
-
-    # 大文件上传
-    client_max_body_size 50m;
-}
-```
-
-### WebSocket 代理
-
-WebSocket 需要特殊配置，因为它是长连接且协议会升级：
-
-```nginx
-location /ws {
-    proxy_pass http://backend;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_read_timeout 86400;     # 24小时，避免长连接被断开
-}
-```
-
-## 负载均衡
-
-当单个后端实例扛不住流量时，就需要负载均衡把请求分发到多个实例。
-
-### 基础配置
-
-```nginx
-upstream backend_servers {
-    server 192.168.1.10:3000;
-    server 192.168.1.11:3000;
-    server 192.168.1.12:3000;
-}
-
-server {
-    listen 80;
-    server_name example.com;
-
-    location / {
-        proxy_pass http://backend_servers;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
-### 负载均衡策略
-
-#### 1. 轮询（默认）
-
-请求按顺序轮流分配到每个后端，适合后端实例性能相近的场景。
-
-#### 2. 加权轮询
-
-性能好的机器分配更多请求：
-
-```nginx
-upstream backend {
-    server 192.168.1.10:3000 weight=3;   # 3/6 的请求
-    server 192.168.1.11:3000 weight=2;   # 2/6
-    server 192.168.1.12:3000 weight=1;   # 1/6
-}
-```
-
-#### 3. ip_hash
-
-同一个客户端 IP 的请求始终发到同一个后端，解决会话保持问题（但不推荐，因为客户端 IP 可能变化，且负载不均）：
-
-```nginx
-upstream backend {
-    ip_hash;
-    server 192.168.1.10:3000;
-    server 192.168.1.11:3000;
-}
-```
-
-更好的会话保持方案是用 Redis 等集中式存储共享会话，而不是依赖负载均衡。
-
-#### 4. least_conn
-
-把请求发给当前活跃连接数最少的后端，适合请求处理时间差异大的场景：
-
-```nginx
-upstream backend {
-    least_conn;
-    server 192.168.1.10:3000;
-    server 192.168.1.11:3000;
-}
-```
-
-### 健康检查与故障转移
-
-```nginx
-upstream backend {
-    server 192.168.1.10:3000 max_fails=3 fail_timeout=30s;
-    server 192.168.1.11:3000 max_fails=3 fail_timeout=30s backup;
-    server 192.168.1.12:3000 down;
-}
-```
-
-- `max_fails=3`：30 秒内失败 3 次就标记为不可用
-- `fail_timeout=30s`：不可用状态持续 30 秒后重新尝试
-- `backup`：备用服务器，只有主服务器都不可用时才启用
-- `down`：标记为下线，不参与负载
-
-注意：Nginx 开源版的健康检查是被动的（根据请求失败判断），主动健康检查（定期发探测请求）需要 Nginx Plus 商业版，或者用第三方模块。
-
-## HTTPS 配置
-
-### 用 Let's Encrypt 免费证书
-
-```bash
-# 安装 certbot
-sudo apt-get install certbot python3-certbot-nginx
-
-# 自动获取证书并配置 Nginx
-sudo certbot --nginx -d example.com -d www.example.com
-
-# 自动续期（certbot 会自动添加定时任务）
-sudo certbot renew --dry-run   # 测试续期
-```
-
-### 手动配置 HTTPS
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name example.com;
-
-    ssl_certificate /etc/nginx/ssl/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-
-    # SSL 安全配置
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
-    ssl_prefer_server_ciphers off;
-    ssl_session_cache shared:SSL:10m;
-    ssl_session_timeout 1d;
-    ssl_session_tickets off;
-
-    # HSTS（强制 HTTPS，谨慎开启）
-    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-
-    location / {
-        proxy_pass http://backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-    }
-}
-
-# HTTP 重定向到 HTTPS
-server {
-    listen 80;
-    server_name example.com;
-    return 301 https://$host$request_uri;
-}
-```
-
-## 静态资源优化
-
-### gzip 压缩
-
-```nginx
-gzip on;
-gzip_vary on;
-gzip_proxied any;
-gzip_comp_level 6;          # 压缩级别 1-9，6 是速度和压缩率的平衡
-gzip_min_length 1024;       # 小于 1KB 的文件不压缩
-gzip_types
-    text/plain
-    text/css
-    text/xml
-    text/javascript
-    application/javascript
-    application/json
-    application/xml
-    application/rss+xml
-    image/svg+xml
-    font/ttf
-    font/otf;
-```
-
-### 静态文件缓存
-
-```nginx
-location ~* \.(jpg|jpeg|png|gif|ico|svg|webp)$ {
-    expires 30d;
-    add_header Cache-Control "public, immutable";
-}
-
-location ~* \.(css|js)$ {
-    expires 7d;
-    add_header Cache-Control "public, immutable";
-}
-
-location ~* \.(woff|woff2|ttf|otf|eot)$ {
-    expires 30d;
-    add_header Cache-Control "public, immutable";
-}
-```
-
-### 静态文件服务
-
-```nginx
-server {
-    listen 80;
-    server_name static.example.com;
-    root /var/www/static;
-
-    location / {
-        try_files $uri $uri/ =404;
-        autoindex off;
-    }
-}
-```
-
-## 安全加固
-
-### 隐藏版本号
-
-```nginx
-server_tokens off;    # 隐藏 Nginx 版本号
-```
-
-### 限制请求方法
-
-```nginx
-if ($request_method !~ ^(GET|HEAD|POST|PUT|DELETE)$) {
-    return 405;
-}
-```
-
-### 防止 DDoS / 限流
-
-```nginx
-# 限制每个 IP 的连接数
-limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
-limit_conn conn_limit 20;
-
-# 限制请求速率（每秒 10 个请求，突发 20 个）
-limit_req_zone $binary_remote_addr zone=req_limit:10m rate=10r/s;
-limit_req zone=req_limit burst=20 nodelay;
-```
-
-### IP 黑白名单
-
-```nginx
-# 白名单
-location /admin {
-    allow 192.168.1.0/24;
-    allow 10.0.0.0/8;
-    deny all;
-}
-
-# 黑名单
-location / {
-    deny 192.168.1.100;
-    allow all;
-}
-```
-
-## 性能调优
-
-### worker 进程与连接
-
-```nginx
-worker_processes auto;           # 等于 CPU 核心数
-worker_cpu_affinity auto;        # 绑定 CPU 核心，减少上下文切换
-worker_rlimit_nofile 65535;      # 每个 worker 的最大文件描述符
-
-events {
-    worker_connections 10240;    # 每个 worker 的最大连接数
+    # 每个 worker 的最大并发连接数
+    worker_connections 10240;
+    
+    # 使用 epoll
     use epoll;
+    
+    # 一次接受多个新连接
     multi_accept on;
 }
 ```
 
-最大并发连接数 = worker_processes × worker_connections。
+最大并发连接数 = worker_processes × worker_connections。但实际能支撑的并发还受限于文件描述符限制和内存。
 
-### 系统级调优
+### 第二层：内核参数调优
 
-`/etc/sysctl.conf`：
+```bash
+# /etc/sysctl.conf
 
-```conf
 # 最大文件描述符
 fs.file-max = 1000000
 
-# TCP 优化
-net.ipv4.tcp_max_syn_backlog = 65535
-net.core.netdev_max_backlog = 65535
-net.core.somaxconn = 65535
-net.ipv4.tcp_fin_timeout = 30
-net.ipv4.tcp_tw_reuse = 1
-net.ipv4.ip_local_port_range = 1024 65535
+# 网络核心参数
+net.core.somaxconn = 65535           # 监听队列长度
+net.core.netdev_max_backlog = 65535   # 网络设备队列
+net.core.rmem_default = 262144         # 接收缓冲区默认
+net.core.rmem_max = 16777216           # 接收缓冲区最大
+net.core.wmem_default = 262144         # 发送缓冲区默认
+net.core.wmem_max = 16777216           # 发送缓冲区最大
 
-# 缓冲区
-net.core.rmem_default = 262144
-net.core.rmem_max = 16777216
-net.core.wmem_default = 262144
-net.core.wmem_max = 16777216
+# TCP 参数
+net.ipv4.tcp_max_syn_backlog = 65535   # SYN 队列
+net.ipv4.tcp_fin_timeout = 30           # FIN 超时
+net.ipv4.tcp_tw_reuse = 1               # TIME_WAIT 复用
+net.ipv4.ip_local_port_range = 1024 65535  # 本地端口范围
+net.ipv4.tcp_rmem = 4096 87380 16777216   # TCP 接收缓冲区
+net.ipv4.tcp_wmem = 4096 65536 16777216   # TCP 发送缓冲区
+net.ipv4.tcp_mtu_probing = 1            # MTU 探测
+net.ipv4.tcp_slow_start_after_idle = 0  # 空闲后不重新慢启动
+net.core.default_qdisc = fq              # 队列调度算法（配合 BBR）
+net.ipv4.tcp_congestion_control = bbr    # 拥塞控制算法
 ```
-
-执行 `sudo sysctl -p` 生效。
-
-## 常用运维命令
 
 ```bash
-nginx -t                    # 测试配置文件语法
-nginx -s reload             # 平滑重载配置
-nginx -s reopen             # 重新打开日志文件
-nginx -s stop               # 快速停止
-nginx -s quit               # 优雅停止（处理完当前请求）
+# 应用配置
+sysctl -p
 
-# 查看实时连接状态
-netstat -an | grep :80 | wc -l
-
-# 查看 Nginx 状态（需开启 stub_status）
-curl http://localhost/nginx_status
+# 文件描述符限制（/etc/security/limits.conf）
+* soft nofile 65535
+* hard nofile 65535
 ```
 
-开启状态监控：
+### 第三层：HTTP 优化
 
 ```nginx
-location /nginx_status {
-    stub_status on;
-    access_log off;
-    allow 127.0.0.1;
-    deny all;
+http {
+    # 高效文件传输（零拷贝，sendfile）
+    sendfile on;
+    
+    # 发送 TCP 包时合并小包（减少包数量）
+    tcp_nopush on;
+    
+    # 禁用 Nagle 算法（减少延迟，配合 tcp_nopush）
+    tcp_nodelay on;
+    
+    # 长连接超时
+    keepalive_timeout 65;
+    keepalive_requests 1000;  # 一个长连接最多处理的请求数
+    
+    # 客户端请求头超时
+    client_header_timeout 10s;
+    client_body_timeout 10s;
+    
+    # 发送响应超时
+    send_timeout 10s;
+    
+    # 客户端请求体大小限制
+    client_max_body_size 50m;
+    
+    # 哈希表大小（域名多时调大）
+    server_names_hash_bucket_size 64;
+    server_names_hash_max_size 2048;
+    
+    # MIME 类型
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
 }
 ```
 
-## 常见问题
+### 第四层：gzip / Brotli 压缩
 
-### 502 Bad Gateway
+```nginx
+http {
+    # gzip 压缩
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;          # 压缩级别 1-9，6 是速度和压缩率的平衡
+    gzip_min_length 1024;       # 小于 1KB 不压缩
+    gzip_buffers 16 8k;
+    gzip_http_version 1.1;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/json
+        application/xml
+        application/rss+xml
+        image/svg+xml
+        font/ttf
+        font/otf;
+    
+    # Brotli 压缩（需要 ngx_brotli 模块，压缩率比 gzip 高 15-25%）
+    # brotli on;
+    # brotli_comp_level 6;
+    # brotli_types text/plain text/css application/json application/javascript;
+}
+```
 
-Nginx 能连接但后端没有响应，常见原因：
-- 后端服务挂了
-- 后端服务端口不对
-- 防火墙阻止了 Nginx 到后端的连接
-- 后端处理太慢，超时了
+### 第五层：静态资源缓存
 
-### 504 Gateway Timeout
+```nginx
+server {
+    # 图片缓存 30 天
+    location ~* \.(jpg|jpeg|png|gif|ico|svg|webp)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # CSS/JS 缓存 7 天
+    location ~* \.(css|js)$ {
+        expires 7d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # 字体缓存 30 天
+    location ~* \.(woff|woff2|ttf|otf|eot)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+    
+    # HTML 不缓存（动态内容）
+    location ~* \.html$ {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+    }
+}
+```
 
-Nginx 等后端响应超时，增大 `proxy_read_timeout`，或者优化后端性能。
+### 第六层：代理优化
 
-### 413 Request Entity Too Large
+```nginx
+http {
+    # 上游服务器（后端应用）
+    upstream backend {
+        # 负载均衡策略：least_conn（最少连接）、ip_hash、weight
+        least_conn;
+        
+        server 10.0.0.1:8080 max_fails=3 fail_timeout=30s;
+        server 10.0.0.2:8080 max_fails=3 fail_timeout=30s;
+        server 10.0.0.3:8080 backup;  # 备用服务器
+        
+        # 长连接（Nginx 与后端之间保持长连接，减少握手开销）
+        keepalive 32;
+        keepalive_timeout 60s;
+        keepalive_requests 1000;
+    }
+    
+    server {
+        location / {
+            proxy_pass http://backend;
+            
+            # 代理 HTTP 版本（1.1 支持长连接）
+            proxy_http_version 1.1;
+            
+            # 清除 Connection 头（否则长连接不生效）
+            proxy_set_header Connection "";
+            
+            # 传递真实客户端信息
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # 超时设置
+            proxy_connect_timeout 5s;    # 连接后端超时
+            proxy_send_timeout 30s;       # 发送请求超时
+            proxy_read_timeout 60s;       # 读取响应超时
+            
+            # 缓冲设置
+            proxy_buffering on;
+            proxy_buffer_size 4k;
+            proxy_buffers 8 4k;
+            proxy_busy_buffers_size 8k;
+            
+            # 失败重试
+            proxy_next_upstream error timeout http_500 http_502 http_503;
+            proxy_next_upstream_tries 2;
+        }
+    }
+}
+```
 
-上传文件超过了 `client_max_body_size` 限制，调大这个值。
+### 第七层：SSL/TLS 优化
 
-### 静态文件 404
+```nginx
+server {
+    listen 443 ssl http2;
+    
+    # 证书
+    ssl_certificate /etc/nginx/ssl/fullchain.pem;
+    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+    
+    # 协议（禁用 SSLv3、TLS 1.0、1.1）
+    ssl_protocols TLSv1.2 TLSv1.3;
+    
+    # 加密套件（优先 ECDHE，支持前向保密）
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    
+    # SSL 会话缓存（减少握手开销）
+    ssl_session_cache shared:SSL:10m;   # 10MB 缓存，约 40000 个会话
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;              # 禁用会话票据（更安全）
+    
+    # OCSP Stapling（减少证书验证时间）
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    resolver 8.8.8.8 1.1.1.1 valid=300s;
+    resolver_timeout 5s;
+    
+    # ECDH 曲线
+    ssl_ecdh_curve X25519:prime256v1:secp384r1;
+    
+    # HSTS（强制 HTTPS）
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+}
+```
 
-检查 `root` 或 `alias` 配置是否正确，文件路径是否存在，权限是否正确。
+## 高级功能
+
+### 1. 限流
+
+```nginx
+http {
+    # 按 IP 限流（10r/s，突发 20）
+    limit_req_zone $binary_remote_addr zone=req_limit:10m rate=10r/s;
+    
+    # 按 IP 限制连接数
+    limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
+    
+    server {
+        location /api/ {
+            limit_req zone=req_limit burst=20 nodelay;
+            limit_conn conn_limit 20;
+        }
+    }
+}
+```
+
+### 2. 访问控制
+
+```nginx
+server {
+    # IP 黑白名单
+    location /admin/ {
+        allow 10.0.0.0/8;
+        allow 192.168.0.0/16;
+        deny all;
+    }
+    
+    # 基础认证
+    location /protected/ {
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+    }
+}
+```
+
+### 3. 缓存代理
+
+```nginx
+http {
+    # 缓存路径和配置
+    proxy_cache_path /var/cache/nginx
+        levels=1:2
+        keys_zone=my_cache:10m
+        max_size=1g
+        inactive=60m
+        use_temp_path=off;
+    
+    server {
+        location / {
+            proxy_pass http://backend;
+            proxy_cache my_cache;
+            proxy_cache_valid 200 10m;    # 200 响应缓存 10 分钟
+            proxy_cache_valid 404 1m;     # 404 缓存 1 分钟
+            proxy_cache_use_stale error timeout updating http_500 http_502 http_503;
+            proxy_cache_lock on;           # 防止缓存击穿
+            add_header X-Cache-Status $upstream_cache_status;
+        }
+    }
+}
+```
+
+### 4. WebSocket 代理
+
+```nginx
+server {
+    location /ws/ {
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400;  # 24 小时，避免长连接断开
+        proxy_send_timeout 86400;
+    }
+}
+```
+
+## 性能监控与诊断
+
+### 1. stub_status 模块
+
+```nginx
+server {
+    location /nginx_status {
+        stub_status on;
+        access_log off;
+        allow 127.0.0.1;
+        deny all;
+    }
+}
+```
+
+输出：
+```
+Active connections: 1234
+server accepts handled requests
+ 56789 56789 123456
+Reading: 10 Writing: 20 Waiting: 1204
+```
+
+- `Active connections`：当前活跃连接数
+- `accepts`：总接受连接数
+- `handled`：总处理连接数
+- `requests`：总请求数
+- `Reading`：正在读取请求头的连接
+- `Writing`：正在发送响应的连接
+- `Waiting`：保持长连接等待请求的连接
+
+### 2. 关键指标监控
+
+- **QPS（每秒请求数）**：`requests` 差值 / 时间
+- **并发连接数**：`Active connections`
+- **连接队列**：`ss -lnt` 中 Recv-Q 列
+- **错误率**：5xx 响应占比
+- **响应时间**：上游响应时间（`$upstream_response_time`）
+- **带宽**：网络接口流量
+
+### 3. 日志优化
+
+```nginx
+http {
+    # 自定义日志格式（包含响应时间）
+    log_format detailed '$remote_addr - $remote_user [$time_local] '
+                        '"$request" $status $body_bytes_sent '
+                        '"$http_referer" "$http_user_agent" '
+                        'rt=$request_time uct="$upstream_connect_time" '
+                        'uht="$upstream_header_time" urt="$upstream_response_time"';
+    
+    access_log /var/log/nginx/access.log detailed;
+    
+    # 静态资源不记录日志（减少 IO）
+    location ~* \.(jpg|png|css|js)$ {
+        access_log off;
+    }
+}
+```
+
+## 常见性能问题排查
+
+### 1. 高 CPU 使用率
+
+- 检查 worker_processes 是否等于 CPU 核心数
+- 用 perf 火焰图分析 CPU 时间花在哪里
+- 检查是否有过多的正则匹配（location 配置）
+- 检查 SSL 握手开销（是否启用了会话缓存）
+
+### 2. 高内存使用率
+
+- 检查 worker_connections 是否过大（每个连接约占 10KB 内存）
+- 检查 proxy_buffer_size / proxy_buffers 是否过大
+- 检查缓存（proxy_cache）是否占用过多
+- 检查是否有内存泄漏（长时间运行后内存持续增长）
+
+### 3. 高延迟
+
+- 检查上游响应时间（`$upstream_response_time`）
+- 检查网络延迟（ping、mtr）
+- 检查 DNS 解析时间（resolver 配置）
+- 检查 SSL 握手时间（是否启用了 OCSP Stapling、会话缓存）
+- 检查是否有磁盘 IO 瓶颈（静态文件读取）
+
+### 4. 连接数打满
+
+- 检查 worker_connections 是否足够
+- 检查文件描述符限制（ulimit -n）
+- 检查 keepalive_timeout 是否过长（长连接占用）
+- 检查是否有慢客户端（发送/接收数据很慢，占用连接）
+
+## Nginx 与其他 Web 服务器对比
+
+| 特性 | Nginx | Apache (event MPM) | Caddy |
+|------|-------|---------------------|-------|
+| 架构 | 事件驱动，异步非阻塞 | 事件驱动，多线程 | 事件驱动，Go 协程 |
+| 静态文件 | 极快 | 快 | 快 |
+| 动态内容 | 需反向代理 | 可直接处理（mod_php） | 需反向代理 |
+| 配置 | 复杂但灵活 | 复杂 | 简单（自动 HTTPS） |
+| 模块 | 需编译时加载 | 运行时加载 | Go 插件 |
+| 社区 | 最大 | 大 | 增长中 |
 
 ## 总结
 
-Nginx 是运维和后端开发的必备技能。掌握反向代理、负载均衡、HTTPS、静态资源优化、安全加固和性能调优，就能搭建出高性能、高可用的 Web 服务入口。
+Nginx 的高性能源于其事件驱动的异步非阻塞架构、多进程单线程 worker 设计、以及请求处理的阶段化模型。性能调优是一个系统性工程，需要从七个层次入手：worker 进程配置、内核参数、HTTP 优化、压缩、缓存、代理优化、SSL 优化。
 
-Nginx 的配置虽然看起来多，但核心逻辑很清晰：`http` 块定义全局，`server` 块定义虚拟主机，`location` 块定义 URL 匹配规则。理解了这个三层结构，再查文档就能应对绝大多数场景。
+调优的关键是**先找到瓶颈，再有针对性地调参数**。不要盲目复制网上的"最优配置"——不同的场景（静态文件、反向代理、API 网关、CDN 节点）有不同的最优配置。用数据说话，用监控验证，才能找到真正适合自己的配置。
+
+Nginx 是一个功能极其丰富的 Web 服务器，本文覆盖了性能调优的核心内容，但还有很多高级功能（Lua 脚本、WAF、流量镜像、A/B 测试等）值得深入学习。掌握 Nginx 的原理和调优方法，是每个运维和后端开发者的必备技能。
