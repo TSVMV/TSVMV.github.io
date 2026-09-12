@@ -1,7 +1,7 @@
 ---
 title: 大模型训练讲解—RLHF、DPO与分布式训练深度解析
 date: 2026-09-12 22:00:00
-categories: [AI]
+categories: [AI大模型]
 tags: [AI, 大模型]
 cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg6.jpg
 ---

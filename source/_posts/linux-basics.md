@@ -1,7 +1,7 @@
 ---
 title: Linux性能讲解—系统性能分析与调优实战
 date: 2026-09-11 20:40:00
-categories: [Linux]
+categories: [系统&内核]
 tags: [Linux, 运维]
 cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg8.jpg
 ---

@@ -1,7 +1,7 @@
 ---
 title: 如何从0用GitHub搭建自己的博客
 date: 2026-09-13 10:00:00
-categories: [教程]
+categories: [运维开发]
 tags: [Hexo, GitHub, 博客搭建]
 cover: /img/bg21.jpg
 sticky: 100

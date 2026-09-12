@@ -1,7 +1,7 @@
 ---
 title: Nginx讲解—高性能Web服务器架构与深度调优
 date: 2026-09-12 15:00:00
-categories: [运维]
+categories: [运维开发]
 tags: [运维, Nginx]
 cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg18.jpg
 ---

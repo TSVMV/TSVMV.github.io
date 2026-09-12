@@ -1,7 +1,7 @@
 ---
 title: Pwn讲解—栈溢出高级利用技术与ROP链构造
 date: 2026-09-12 18:00:00
-categories: [CTF, Pwn]
+categories: [CTF]
 tags: [CTF, Pwn]
 cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg12.jpg
 ---
