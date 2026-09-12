@@ -2,7 +2,7 @@
 title: Reverse讲解—高级逆向技术与反混淆实战
 date: 2026-09-12 19:00:00
 categories: [CTF, Reverse]
-tags: [CTF, Reverse, 逆向工程, 反混淆, 符号执行, 虚拟机保护]
+tags: [CTF, Reverse, 反混淆]
 cover: /img/bg13.jpg
 ---
 

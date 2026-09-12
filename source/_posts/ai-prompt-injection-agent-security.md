@@ -2,7 +2,7 @@
 title: 提示注入讲解—大模型间接提示注入与 Agent 安全
 date: 2026-09-13 01:00:00
 categories: [AI安全, 大模型]
-tags: [AI安全, 提示注入, Prompt Injection, Agent安全, LLM, 间接注入]
+tags: [AI, 大模型, AI安全]
 cover: /img/bg4.jpg
 ---
 

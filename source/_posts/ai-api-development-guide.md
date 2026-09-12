@@ -2,7 +2,7 @@
 title: 大模型推理讲解—量化、KV缓存与推理加速技术深度解析
 date: 2026-09-12 17:00:00
 categories: [AI, 大模型]
-tags: [AI, LLM, 推理优化, 量化, KV缓存, vLLM, TensorRT]
+tags: [AI, 大模型, 推理优化]
 cover: /img/bg11.jpg
 ---
 

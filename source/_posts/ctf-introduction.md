@@ -2,7 +2,7 @@
 title: CTF方法论讲解—竞赛解题思路与团队协作实战
 date: 2026-09-11 20:45:00
 categories: [CTF, 方法论]
-tags: [CTF, 解题方法论, 团队协作, Web, Pwn, Reverse, Crypto]
+tags: [CTF, 方法论]
 cover: /img/bg9.jpg
 ---
 

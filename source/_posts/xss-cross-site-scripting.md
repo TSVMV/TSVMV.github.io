@@ -2,7 +2,7 @@
 title: XSS讲解—高级利用技术与CSP深度绕过
 date: 2026-09-12 20:00:00
 categories: [Web安全, CTF]
-tags: [XSS, Web安全, CSP绕过, CTF, DOM XSS, mutation XSS]
+tags: [Web安全, XSS, CTF]
 cover: /img/bg14.jpg
 ---
 

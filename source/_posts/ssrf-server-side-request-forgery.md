@@ -2,7 +2,7 @@
 title: SSRF讲解—高级利用技术与云环境逃逸
 date: 2026-09-12 21:00:00
 categories: [Web安全, CTF]
-tags: [SSRF, Web安全, 内网渗透, CTF, 云安全, gopher]
+tags: [Web安全, SSRF, CTF]
 cover: /img/bg15.jpg
 ---
 

@@ -2,7 +2,7 @@
 title: SQL注入讲解—高级注入技术与WAF深度绕过
 date: 2026-09-12 16:00:00
 categories: [CTF, Web安全]
-tags: [CTF, Web, SQL注入, WAF绕过, 堆叠注入, 无列名注入]
+tags: [CTF, Web安全, SQL注入]
 cover: /img/bg10.jpg
 ---
 

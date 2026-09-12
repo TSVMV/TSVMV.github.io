@@ -2,7 +2,7 @@
 title: Pwn讲解—栈溢出高级利用技术与ROP链构造
 date: 2026-09-12 18:00:00
 categories: [CTF, Pwn]
-tags: [CTF, Pwn, 栈溢出, ROP, SROP, ret2csu, ret2reg]
+tags: [CTF, Pwn, ROP]
 cover: /img/bg12.jpg
 ---
 

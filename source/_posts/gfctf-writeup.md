@@ -2,7 +2,7 @@
 title: GFCTF WP
 date: 2026-09-11 21:00:00
 categories: [CTF, Writeup]
-tags: [CTF, GFCTF, Web, Pwn, Reverse, Crypto, WP]
+tags: [CTF, WP]
 cover: /img/banner3.jpg
 ---
 
