@@ -1,8 +1,8 @@
 ---
 title: eBPF 可观测性实战：从零编写系统调用追踪工具
 date: 2026-09-13 02:00:00
-categories: [内核技术, 可观测性]
-tags: [eBPF, Linux, 可观测性]
+categories: [Linux]
+tags: [Linux, eBPF]
 cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg17.jpg
 ---
 

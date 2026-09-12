@@ -1,8 +1,8 @@
 ---
 title: 容器逃逸讲解—Docker 隔离机制与逃逸技术深度分析
 date: 2026-09-12 14:00:00
-categories: [容器安全, 漏洞利用]
-tags: [容器安全, 容器逃逸, Docker]
+categories: [运维]
+tags: [运维, Docker]
 cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg7.jpg
 ---
 

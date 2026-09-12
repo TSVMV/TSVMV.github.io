@@ -1,8 +1,8 @@
 ---
 title: CTF方法论讲解—竞赛解题思路与团队协作实战
 date: 2026-09-11 20:45:00
-categories: [CTF, 方法论]
-tags: [CTF, 方法论]
+categories: [CTF]
+tags: [CTF]
 cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg9.jpg
 ---
 

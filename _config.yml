@@ -5,8 +5,8 @@
 # Site
 title: VMV 的博客
 subtitle: ''
-description: 一个基于 Hexo + Butterfly 主题搭建的个人博客
-keywords: 博客,技术,生活,CTF
+description: VMV的个人技术博客，专注CTF、网络安全、漏洞分析、AI大模型、Linux运维、编程开发等领域的技术分享与实战记录
+keywords: VMV,博客,技术博客,CTF,网络安全,漏洞分析,Web安全,Pwn,Reverse,密码学,AI,大模型,Linux,运维,编程,GitHub Pages,Hexo
 author: VMV
 language: zh-CN
 timezone: Asia/Shanghai

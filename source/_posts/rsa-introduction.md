@@ -1,8 +1,8 @@
 ---
 title: RSA 攻击讲解—从数学原理到实战利用
 date: 2026-09-11 20:35:00
-categories: [密码学, CTF]
-tags: [密码学, RSA, CTF]
+categories: [密码学]
+tags: [密码学, CTF]
 cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg.jpg
 ---
 

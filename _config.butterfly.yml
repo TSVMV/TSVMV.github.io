@@ -126,7 +126,7 @@ post_meta:
     # Choose: date / relative
     date_format: date
     categories: true
-    tags: false
+    tags: true
     label: true
   post:
     # Choose: left / center
@@ -191,7 +191,7 @@ index_layout: 3
 index_post_content:
   method: 3
   # If you set method to 2 or 3, the length need to config
-  length: 500
+  length: 300
 
 # --------------------------------------
 # Post Settings
@@ -271,7 +271,7 @@ footer:
   copyright:
     enable: true
     version: true
-  custom_text: <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank">Butterfly</a></p>
+  custom_text: '<p>© 2026 VMV | 抖音: VMV_SRC | QQ: VMVflag | 邮箱: 3347123386@qq.com</p><p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank">Butterfly</a></p>'
 
 # --------------------------------------
 # Aside Settings
