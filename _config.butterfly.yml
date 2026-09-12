@@ -833,8 +833,8 @@ beautify:
 font:
   global_font_size:
   code_font_size:
-  font_family:
-  code_font_family:
+  font_family: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif'
+  code_font_family: 'JetBrains Mono, Fira Code, Consolas, Monaco, Courier New, monospace'
 
 # Font settings for the site title and site subtitle
 blog_title_font:
@@ -1029,12 +1029,12 @@ lazyload:
 # See https://github.com/JLHwung/hexo-offline
 # ---------------
 pwa:
-  enable: false
-  manifest:
-  apple_touch_icon:
-  favicon_32_32:
-  favicon_16_16:
-  mask_icon:
+  enable: true
+  manifest: /manifest.json
+  apple_touch_icon: /img/favicon.png
+  favicon_32_32: /img/favicon.png
+  favicon_16_16: /img/favicon.png
+  mask_icon: /img/favicon.png
 
 # Open graph meta tags
 # https://hexo.io/docs/helpers#open-graph

@@ -125,3 +125,19 @@ feed:
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: ''
+
+# HTML 压缩
+html_minifier:
+  enable: true
+  exclude:
+    - '**/downloads/**'
+  collapseBooleanAttributes: true
+  collapseWhitespace: true
+  ignoreCustomComments:
+    - '^\s*more'
+  removeComments: true
+  removeEmptyAttributes: true
+  removeScriptTypeAttributes: true
+  removeStyleLinkTypeAttributes: true
+  minifyJS: true
+  minifyCSS: true
