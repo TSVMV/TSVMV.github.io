@@ -3,7 +3,7 @@ title: 模型窃取与模型提取攻击技术深度解析
 date: 2026-09-13 17:00:00
 categories: [AI大模型]
 tags: [AI, 大模型, AI安全]
-cover: /img/bg26.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg30.jpg
 ---
 
 ## 模型窃取的威胁模型

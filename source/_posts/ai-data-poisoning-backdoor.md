@@ -3,7 +3,7 @@ title: 训练数据投毒与后门攻击深度解析
 date: 2026-09-13 16:00:00
 categories: [AI大模型]
 tags: [AI, 大模型, AI安全]
-cover: /img/bg25.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg29.jpg
 ---
 
 ## 投毒攻击的本质

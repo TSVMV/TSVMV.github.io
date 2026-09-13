@@ -3,7 +3,7 @@ title: AI 隐私泄露—成员推断与训练数据提取技术
 date: 2026-09-13 19:00:00
 categories: [AI大模型]
 tags: [AI, 大模型, AI安全]
-cover: /img/bg17.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg32.jpg
 ---
 
 ## 大模型的隐私问题

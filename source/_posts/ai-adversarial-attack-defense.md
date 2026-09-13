@@ -3,7 +3,7 @@ title: 对抗样本攻击与防御—从图像到大模型
 date: 2026-09-13 18:00:00
 categories: [AI大模型]
 tags: [AI, 大模型, AI安全]
-cover: /img/bg16.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg31.jpg
 ---
 
 ## 对抗样本的本质

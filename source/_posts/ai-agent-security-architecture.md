@@ -3,7 +3,7 @@ title: AI Agent 安全架构与攻击面分析
 date: 2026-09-13 15:00:00
 categories: [AI大模型]
 tags: [AI, 大模型, AI安全]
-cover: /img/bg24.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg28.jpg
 ---
 
 ## Agent 为什么比纯 LLM 更危险
