@@ -267,11 +267,10 @@ footer:
   owner:
     enable: true
     since: 2026
-  # Copyright of theme and framework
   copyright:
-    enable: true
-    version: true
-  custom_text: '<p>© 2026 VMV | 抖音: VMV_SRC | QQ: VMVflag | 邮箱: 3347123386@qq.com</p><p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> & <a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank">Butterfly</a></p>'
+    enable: false
+    version: false
+  custom_text: '<p>© 2026 VMV | 抖音: VMV_SRC | QQ: VMVflag | 邮箱: 3347123386@qq.com</p>'
 
 # --------------------------------------
 # Aside Settings
