@@ -3,7 +3,7 @@ title: 郑旺中学"关系户"真NB
 date: 2026-09-16 14:00:00
 categories: [随笔]
 tags: [随笔, 吐槽]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg31.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg41.jpg
 ---
 
 > **免责声明**

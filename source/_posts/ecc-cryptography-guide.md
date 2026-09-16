@@ -3,7 +3,7 @@ title: 椭圆曲线密码学(ECC)详解—从数学原理到 CTF 密码学实战
 date: 2026-09-16 12:00:00
 categories: [CTF]
 tags: [CTF, 密码学, 数论]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg29.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg39.jpg
 ---
 
 椭圆曲线密码学（ECC）是现代密码学的基石之一。Bitcoin 用 secp256k1，TLS 用 secp256r1，Signal 用 X25519，WhatsApp 用 Curve25519。CTF 密码学题里，ECC 更是常客——从小白友好的非ce点攻击，到高难度的 SMART 攻击、无效曲线攻击、MOV 攻击，变种繁多。

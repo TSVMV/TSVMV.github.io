@@ -3,7 +3,7 @@ title: 后缀自动机(SAM)详解—从原理到 CTF 字符串题实战
 date: 2026-09-16 11:00:00
 categories: [CTF]
 tags: [CTF, 算法, 字符串]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg28.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg38.jpg
 ---
 
 后缀自动机（Suffix Automaton，简称 SAM）是处理字符串问题最强大的数据结构之一。它能在 O(n) 时间内构造出一个状态数 O(n) 的自动机，之后可以在线性时间内回答大量字符串相关的问题：不同子串个数、最长重复子串、出现次数最多的子串、子串出现次数、最小表示法……在 CTF 的 Misc 和逆向题中，SAM 经常用来做字符串匹配、密码分析、文本去重等任务。

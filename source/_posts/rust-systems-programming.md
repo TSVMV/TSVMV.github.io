@@ -3,7 +3,7 @@ title: Rust 系统编程入门—从 unsafe 到安全工具开发
 date: 2026-09-16 13:00:00
 categories: [运维开发]
 tags: [编程, Rust, 系统编程]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg30.jpg
+cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg40.jpg
 ---
 
 很多人对 Rust 的印象停留在"安全、 borrow checker、学习曲线陡峭"。但在安全工具开发领域，Rust 真正的价值是：**它让你能写 C 级别的底层代码，同时不 segfault。**
