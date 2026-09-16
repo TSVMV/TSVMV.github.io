@@ -3,7 +3,7 @@ title: 大模型越狱攻击与防御技术深度解析
 date: 2026-09-13 14:00:00
 categories: [AI大模型]
 tags: [AI, 大模型, AI安全]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg27.jpg
+
 ---
 
 ## 越狱的本质
