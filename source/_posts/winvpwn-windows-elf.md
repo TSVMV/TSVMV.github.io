@@ -3,7 +3,6 @@ title: winVpwn：在 Windows 上原生运行 Linux ELF 二进制
 date: 2026-09-16 10:00:00
 categories: [CTF]
 tags: [CTF, Pwn, 逆向]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg27.jpg
 ---
 
 > 一个基于 Unicorn 的 pwntools 兼容层，无需 WSL、虚拟机或 Docker。
