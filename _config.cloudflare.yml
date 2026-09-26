@@ -1,0 +1,7 @@
+# Cloudflare Pages 专用覆盖配置
+# 与 GitHub Pages 站点（_config.yml 中的 TSVMV.github.io）共用同一份源码，
+# 仅在构建时覆盖站点主域名，两个站点互不影响。
+#
+# 构建命令：npx hexo generate --config _config.yml,_config.cloudflare.yml
+
+url: https://vmvsec.cc.cd

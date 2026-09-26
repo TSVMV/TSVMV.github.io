@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /js/
-Disallow: /css/
-Disallow: /fonts/
-
-Sitemap: https://TSVMV.github.io/sitemap.xml
