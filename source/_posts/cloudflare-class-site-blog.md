@@ -3,7 +3,7 @@ title: 如何用 Cloudflare 搭建班级文化网站 / 个人博客
 date: 2026-09-28 20:30:00
 categories: [运维开发]
 tags: [Cloudflare, Cloudflare Pages, Vue, Hexo, 网站搭建]
-cover: /img/bg22.jpg
+cover: /img/bg23.jpg
 sticky: 90
 ---
 
