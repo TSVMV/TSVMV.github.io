@@ -1,0 +1,77 @@
+/* VMV 二次元风格微调：樱花粉主题、圆角卡片、菜单动效、樱花光标选中态 */
+
+::selection {
+  background: rgba(255, 124, 156, 0.28);
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ffb7d5, #ff7c9c);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 183, 213, 0.12);
+}
+
+/* 卡片更圆润、阴影更柔和 */
+#recent-posts > .recent-post-item,
+.card-widget,
+#page-header .tips #site-info {
+  border-radius: 18px;
+}
+
+#recent-posts > .recent-post-item {
+  box-shadow: 0 4px 18px rgba(255, 124, 156, 0.10);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+#recent-posts > .recent-post-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 26px rgba(255, 124, 156, 0.18);
+}
+
+/* 顶栏菜单：悬停轻微上浮 */
+#menu .menu-item {
+  transition: transform 0.2s ease;
+}
+
+#menu .menu-item:hover {
+  transform: translateY(-2px);
+}
+
+/* 友链卡片悬停 */
+.flink-list-item:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 22px rgba(255, 124, 156, 0.22);
+}
+
+/* 背景音乐播放器：按要求不可关闭 —— 缩小到左下角小圆盘、
+ * 禁止交互（点不到就无法暂停/关闭），列表不弹出。
+ * 注意：#vmv-bgm 容器本身就是 .aplayer-fixed 根元素 */
+#vmv-bgm .aplayer-body {
+  width: auto !important;
+  left: 6px !important;
+  bottom: 6px !important;
+  transform: scale(0.42);
+  transform-origin: left bottom;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+#vmv-bgm .aplayer-notice,
+#vmv-bgm .aplayer-miniswitcher,
+#vmv-bgm .aplayer-list {
+  display: none !important;
+}
+
+/* 页脚小樱花 */
+#footer::after {
+  content: " ❀ ";
+  color: #ff7c9c;
+}

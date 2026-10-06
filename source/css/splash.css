@@ -61,6 +61,54 @@ html.splash-fade #vmv-splash {
   color: #e6f1ff;
   cursor: pointer;
   font-family: "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
+  overflow: hidden;
+}
+
+/* 二次元背景视频 + 暗幕 */
+#vmv-splash .vs-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.4;
+  filter: saturate(1.15);
+}
+
+#vmv-splash .vs-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7, 9, 15, 0.55) 0%, rgba(7, 9, 15, 0.88) 100%);
+}
+
+/* 飘落樱花瓣 */
+#vmv-splash .vs-petals {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#vmv-splash .vs-petals i {
+  position: absolute;
+  top: -24px;
+  border-radius: 80% 0 60% 60% / 60% 0 80% 60%;
+  background: linear-gradient(135deg, #ffd6e7, #ff8fb8);
+  animation: vs-fall linear infinite;
+}
+
+@keyframes vs-fall {
+  to {
+    transform: translateY(110vh) rotate(540deg);
+  }
+}
+
+#vmv-splash .vs-logo,
+#vmv-splash .vs-term,
+#vmv-splash .vs-tip {
+  position: relative;
+  z-index: 2;
 }
 
 #vmv-splash .vs-logo {
@@ -94,7 +142,7 @@ html.splash-fade #vmv-splash {
 }
 
 #vmv-splash .vs-logo::after {
-  color: #4ade80;
+  color: #ff7c9c;
   animation: vs-glitch-b 1.3s steps(2, end) infinite;
   clip-path: inset(60% 0 10% 0);
 }

@@ -17,11 +17,15 @@ nav:
   # Whether to fix navigation bar
   fixed: true
 
+# 主题色：樱花粉（二次元风格）
+main_color: '#ff7c9c'
+
 menu:
   首页: / || fas fa-home
-  归档: /archives/ || fas fa-archive
-  分类: /categories/ || fas fa-folder-open
-  标签: /tags/ || fas fa-tags
+  站点:
+    归档: /archives/ || fas fa-archive
+    分类: /categories/ || fas fa-folder-open
+    标签: /tags/ || fas fa-tags
   关于: /about/ || fas fa-heart
   友链: /link/ || fas fa-link
 
@@ -1062,10 +1066,15 @@ css_prefix: true
 inject:
   head:
     - <link rel="stylesheet" href="/css/splash.css">
+    - <link rel="stylesheet" href="/css/anime.css">
+    - <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
     - >-
       <script>(function(){var el=document.documentElement;try{if(sessionStorage.getItem("vmv-splash-done"))return;sessionStorage.setItem("vmv-splash-done","1")}catch(e){return}if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;el.classList.add("splash-running");setTimeout(function(){el.classList.remove("splash-running")},4000)})();</script>
   bottom:
     - <script src="/js/splash.js"></script>
+    - <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+    - <script src="/js/bgm.js"></script>
+    - <script src="/js/mouse-trail.js"></script>
 
 # CDN Settings
 # Don't modify the following settings unless you know how they work

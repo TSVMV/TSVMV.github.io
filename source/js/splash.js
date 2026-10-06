@@ -16,10 +16,31 @@
   var wrap = document.createElement("div");
   wrap.id = "vmv-splash";
   wrap.innerHTML =
+    '<video class="vs-bg" src="/img/ayaka.mp4" muted loop playsinline preload="auto"></video>' +
+    '<div class="vs-shade"></div>' +
+    '<div class="vs-petals"></div>' +
     '<div class="vs-logo" data-text="VMV">VMV<span class="vs-cursor">&nbsp;</span></div>' +
     '<pre class="vs-term"></pre>' +
     '<div class="vs-tip">click / any key to skip</div>';
   html.appendChild(wrap);
+
+  // 樱花瓣：随机位置/速度/大小
+  var petalBox = wrap.querySelector(".vs-petals");
+  for (var k = 0; k < 10; k++) {
+    var petal = document.createElement("i");
+    var size = 7 + Math.random() * 8;
+    petal.style.cssText =
+      "left:" + (Math.random() * 100) + "%;" +
+      "width:" + size + "px;height:" + size + "px;" +
+      "animation-duration:" + (2.6 + Math.random() * 2.4) + "s;" +
+      "animation-delay:-" + (Math.random() * 4) + "s;" +
+      "opacity:" + (0.5 + Math.random() * 0.4).toFixed(2);
+    petalBox.appendChild(petal);
+  }
+
+  // 背景视频：muted 自动播放，失败则退回纯深色底
+  var vid = wrap.querySelector(".vs-bg");
+  vid.play().catch(function () { vid.remove(); });
 
   var term = wrap.querySelector(".vs-term");
   var lines = [
