@@ -1031,7 +1031,7 @@ instantpage: true
 lazyload:
   enable: true
   # Use browser's native lazyload instead of vanilla-lazyload
-  native: false
+  native: true
   # Specify the field to use lazyload (site or post)
   field: site
   placeholder:
@@ -1075,14 +1075,14 @@ inject:
   head:
     - <link rel="stylesheet" href="/css/splash.css?v=20261006d">
     - <link rel="stylesheet" href="/css/anime.css?v=20261006d">
-    - <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+    - <link rel="stylesheet" href="/lib/aplayer/APlayer.min.css">
     - >-
       <script>try{if(navigator.serviceWorker){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(window.caches&&caches.keys){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}}catch(e){}</script>
     - >-
       <script>(function(){var el=document.documentElement;var ref=document.referrer||"";var same=false;try{same=!!ref&&new URL(ref).host===location.host}catch(e){}if(same)return;el.classList.add("splash-running");setTimeout(function(){el.classList.remove("splash-running")},7500)})();</script>
   bottom:
     - <script src="/js/splash.js?v=20261006d"></script>
-    - <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+    - <script src="/lib/aplayer/APlayer.min.js"></script>
     - <script src="/js/bgm.js?v=20261006d"></script>
     - <script src="/js/mouse-trail.js?v=20261006d"></script>
     - >-

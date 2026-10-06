@@ -8,11 +8,15 @@
   var html = document.documentElement;
   if (!html.classList.contains("splash-running")) return;
 
+  // 小屏（手机）跳过视频背景，只用静态图省流量
+  var smallScreen = window.matchMedia &&
+    window.matchMedia("(max-width: 768px)").matches;
+
   var wrap = document.createElement("div");
   wrap.id = "vmv-splash";
   wrap.innerHTML =
     '<img class="vs-bgimg" src="/img/anime/mahoyo.jpg" alt="">' +
-    '<video class="vs-bg" src="/img/ayaka.mp4" muted loop playsinline preload="auto"></video>' +
+    (smallScreen ? "" : '<video class="vs-bg" src="/img/ayaka.mp4" muted loop playsinline preload="auto"></video>') +
     '<div class="vs-shade"></div>' +
     '<div class="vs-petals"></div>' +
     '<div class="vs-stage">' +
@@ -42,12 +46,14 @@
   // 背景视频：就绪后淡入；加载失败则移除，留下静态图兜底
   var vid = wrap.querySelector(".vs-bg");
   var vidReady = false;
-  vid.addEventListener("canplay", function () {
-    vidReady = true;
-    vid.classList.add("vs-ready");
-  });
-  var pp = vid.play && vid.play();
-  if (pp && pp.catch) pp.catch(function () { vid.remove(); });
+  if (vid) {
+    vid.addEventListener("canplay", function () {
+      vidReady = true;
+      vid.classList.add("vs-ready");
+    });
+    var pp = vid.play && vid.play();
+    if (pp && pp.catch) pp.catch(function () { vid.remove(); });
+  }
 
   var term = wrap.querySelector(".vs-term");
   var granted = wrap.querySelector(".vs-granted");
@@ -108,7 +114,7 @@
   var waited = 0;
   var gate = setInterval(function () {
     waited += 100;
-    if (vidReady || !vid.parentNode || waited >= 900) {
+    if (vidReady || !vid || !vid.parentNode || waited >= 900) {
       clearInterval(gate);
       startSequence();
     }

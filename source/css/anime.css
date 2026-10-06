@@ -135,6 +135,13 @@
   z-index: 998 !important;
 }
 
+/* 手机小屏隐藏看板娘，避免遮挡内容 */
+@media (max-width: 768px) {
+  #waifu {
+    display: none !important;
+  }
+}
+
 /* 看板娘：隐藏那排拍照/换装/关闭的圆形工具按钮（太丑），保留人物与气泡 */
 #waifu-tool {
   display: none !important;
