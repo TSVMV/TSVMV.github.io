@@ -38,11 +38,32 @@
         a: 1,
         rot: Math.random() * Math.PI,
         vr: (Math.random() - 0.5) * 0.14,
-        c: colors[(Math.random() * colors.length) | 0]
+        c: colors[(Math.random() * colors.length) | 0],
+        env: false
       });
     }
     if (parts.length > 220) parts.splice(0, parts.length - 220);
   });
+
+  // 全站常驻樱花雨：每隔一阵从顶部飘落几片，重度二次元氛围
+  setInterval(function () {
+    if (document.hidden) return;
+    for (var i = 0; i < 3; i++) {
+      parts.push({
+        x: Math.random() * window.innerWidth,
+        y: -10,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: 0.6 + Math.random() * 0.9,
+        r: 4 + Math.random() * 5,
+        a: 0.85,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.1,
+        c: colors[(Math.random() * colors.length) | 0],
+        env: true
+      });
+    }
+    if (parts.length > 320) parts.splice(0, parts.length - 320);
+  }, 900);
 
   (function loop() {
     ctx.clearRect(0, 0, W, H);
@@ -51,10 +72,19 @@
       p.x += p.vx + Math.sin(p.y * 0.02) * 0.35;
       p.y += p.vy;
       p.rot += p.vr;
-      p.a -= 0.013;
-      if (p.a <= 0 || p.y > H + 12) {
-        parts.splice(i, 1);
-        continue;
+      var offscreen = p.y > H + 12 || p.x < -24 || p.x > W + 24;
+      if (p.env) {
+        // 环境花瓣不随时间淡出，飘出屏幕才移除
+        if (offscreen) {
+          parts.splice(i, 1);
+          continue;
+        }
+      } else {
+        p.a -= 0.013;
+        if (p.a <= 0 || offscreen) {
+          parts.splice(i, 1);
+          continue;
+        }
       }
       ctx.save();
       ctx.translate(p.x, p.y);

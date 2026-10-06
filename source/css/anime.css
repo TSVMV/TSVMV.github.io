@@ -19,21 +19,36 @@
   background: rgba(255, 183, 213, 0.12);
 }
 
-/* 卡片更圆润、阴影更柔和 */
-#recent-posts > .recent-post-item,
+/* 卡片更圆润、阴影更柔和 + 重度二次元：磨砂半透明，让动漫背景透出来 */
+#recent-posts .recent-post-item,
 .card-widget,
-#page-header .tips #site-info {
-  border-radius: 18px;
+#page,
+#archive {
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  box-shadow: 0 4px 20px rgba(255, 124, 156, 0.12) !important;
 }
 
-#recent-posts > .recent-post-item {
-  box-shadow: 0 4px 18px rgba(255, 124, 156, 0.10);
+#recent-posts .recent-post-item {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-#recent-posts > .recent-post-item:hover {
+#recent-posts .recent-post-item:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 26px rgba(255, 124, 156, 0.18);
+  box-shadow: 0 10px 28px rgba(255, 124, 156, 0.2) !important;
+}
+
+/* 文章封面圆角跟随卡片 */
+#recent-posts > .recent-post-item > .post_cover img,
+#recent-posts > .recent-post-item > .img_cover img {
+  border-radius: 0;
+}
+
+/* 首页大标题加粉色光晕，更二次元 */
+#page-header #site-info .site-title {
+  text-shadow: 0 0 18px rgba(255, 124, 156, 0.75), 0 2px 30px rgba(56, 189, 248, 0.4);
 }
 
 /* 顶栏菜单：悬停轻微上浮 */
@@ -43,6 +58,21 @@
 
 #menu .menu-item:hover {
   transform: translateY(-2px);
+}
+
+/* 导航顺序调整：菜单在前，搜索按钮移到最右 */
+#nav {
+  display: flex;
+  align-items: center;
+}
+
+#nav #menus {
+  order: 1;
+  margin-left: auto;
+}
+
+#nav #search-button {
+  order: 2;
 }
 
 /* 友链卡片悬停 */
@@ -94,6 +124,23 @@
 @keyframes vmv-note-bounce {
   0%, 100% { transform: translateY(0) rotate(-6deg); }
   50% { transform: translateY(-5px) rotate(6deg); }
+}
+
+/* 看板娘：定位右下角、无工具栏；台词改 source/live2d/waifu-tips.json */
+#waifu {
+  left: auto !important;
+  right: 10px !important;
+  bottom: 0 !important;
+}
+
+#waifu #live2d {
+  width: 220px !important;
+  height: 250px !important;
+}
+
+/* 看板娘：隐藏那排拍照/换装/关闭的圆形工具按钮（太丑），保留人物与气泡 */
+#waifu-tool {
+  display: none !important;
 }
 
 /* 页脚：FRIEND LINKS 快捷区 + 终端风装饰行（借鉴朋友的 CTF WriteUp 博客） */

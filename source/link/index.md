@@ -7,26 +7,28 @@ type: link
 > 欢迎来到朋友们的聚集地。交换友链前先读完下面的「申请方式」，欢迎同好交流。
 
 {% flink %}
-- class_name: 技术站点
-  class_desc: 网络安全与 CTF 方向的朋友们
+- class_name: 技术网站
+  class_desc: 常逛的 CTF 与网络安全平台
   link_list:
     - name: 青岑CTF
       link: https://ctf.qingcen.net
-      descr: 青岑CTF — CTF 竞赛练习与竞技平台
+      descr: CTF 竞赛练习与竞技平台
       avatar: https://ctf.qingcen.net/favicon.png
-    - name: CTF WriteUp
-      link: https://heliumsenbrg.github.io/ctf-writeup-blog/
-      descr: Web 安全 Writeup 与知识库 · 一血收割机
-      avatar: https://heliumsenbrg.github.io/ctf-writeup-blog/favicon.svg
-    - name: 懒羊羊大佬
-      link: https://yangleduo0629-cloud.github.io/-/#/
-      descr: 朋友的博客，欢迎来玩
-      avatar: https://yangleduo0629-cloud.github.io/-/favicon.svg
-    - name: 累了
-      link: https://cd835.github.io/ZS/
-      descr: 朋友的博客，欢迎来玩
-      avatar: https://img2024.cnblogs.com/blog/3838669/202608/3838669-20260808002752655-626617498.jpg
+    - name: CTF+
+      link: https://ctf.plus
+      descr: CTF 竞赛与社区广场
+      avatar: https://ctf.plus/favicon.ico
+    - name: 攻防世界
+      link: https://adworld.xctf.org.cn
+      descr: XCTF 在线攻防练习平台
+      avatar: https://adworld.xctf.org.cn/favicon.ico
+    - name: 补天
+      link: https://www.butian.net
+      descr: 漏洞响应平台
+      avatar: https://www.butian.net/favicon.ico
 {% endflink %}
+
+以后想加朋友的博客，直接在下方「申请方式」里走流程就行。
 
 ## 本站信息
 
