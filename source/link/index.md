@@ -7,6 +7,20 @@ type: link
 > 欢迎来到朋友们的聚集地。交换友链前先读完下面的「申请方式」，欢迎同好交流。
 
 {% flink %}
+- class_name: 博客
+  class_desc: 朋友们的博客，欢迎交换友链
+  link_list:
+    - name: heliumsenbrg
+      link: https://heliumsenbrg.github.io/ctf-writeup-blog/
+      descr: heliumsenbrg 的 Web 安全 CTF 题解博客
+      avatar: https://heliumsenbrg.github.io/ctf-writeup-blog/favicon.svg
+    - name: 累了
+      link: https://cd835.github.io/ZS/
+      descr: 朋友的博客，欢迎来玩
+      avatar: https://img2024.cnblogs.com/blog/3838669/202608/3838669-20260808002752655-626617498.jpg
+{% endflink %}
+
+{% flink %}
 - class_name: 技术网站
   class_desc: 常逛的 CTF 与网络安全平台
   link_list:
@@ -27,8 +41,6 @@ type: link
       descr: 漏洞响应平台
       avatar: https://www.butian.net/favicon.ico
 {% endflink %}
-
-以后想加朋友的博客，直接在下方「申请方式」里走流程就行。
 
 ## 本站信息
 
