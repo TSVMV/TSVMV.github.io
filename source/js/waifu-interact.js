@@ -8,6 +8,9 @@
 
   var last = 0;
   function onInteract(e) {
+    // 点在主题按钮/链接/输入框上时不触发看板娘互动
+    if (e.target && e.target.closest &&
+        e.target.closest(".rightside, #nav, a, button, input, textarea")) return;
     var canvas = e.target && e.target.closest && e.target.closest("#waifu canvas");
     if (!canvas) return;
     var now = Date.now();

@@ -132,7 +132,9 @@
   left: auto !important;
   right: 10px !important;
   bottom: 0 !important;
-  z-index: 998 !important;
+  /* 99 = 压在主题右下角按钮组(z-index:100)之下，避免透明画布挡住按钮；
+     仍在页面内容之上 */
+  z-index: 99 !important;
 }
 
 /* 手机小屏隐藏看板娘，避免遮挡内容 */
