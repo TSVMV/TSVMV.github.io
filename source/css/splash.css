@@ -65,14 +65,29 @@ html.splash-fade #vmv-splash {
 }
 
 /* 二次元背景视频 + 暗幕 */
+#vmv-splash .vs-bgimg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.5;
+  filter: saturate(1.1);
+}
+
 #vmv-splash .vs-bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.55;
+  opacity: 0;
   filter: saturate(1.15);
+  transition: opacity 0.5s ease;
+}
+
+#vmv-splash .vs-bg.vs-ready {
+  opacity: 0.55;
 }
 
 #vmv-splash .vs-shade {

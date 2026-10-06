@@ -1,8 +1,7 @@
-/* VMV 进站启动动画 v3 · 播放脚本
- * 前置条件：head 内联脚本已给 <html> 加上 splash-running 类（每次进站都会播，
- * 站内跳转不播）。本脚本把舞台挂到 <html> 上（body 此时被 CSS 隐藏）：
- * 背景视频 + 暗幕 + 樱花瓣 + 故障标题 + 引导日志 + ACCESS GRANTED + 进度条，
- * 播完/点击/任意键后淡出清理。 */
+/* VMV 进站启动动画 v4 · 播放脚本
+ * 前置：head 内联脚本给 <html> 加 splash-running（每次进站都播，站内跳转不播）。
+ * 背景：静态动漫图兜底 + ayaka.mp4 视频就绪后淡入叠加；
+ * 逐行引导日志等视频就绪（或最多 0.9 秒）再开始，避免视频没加载完动画就播完了。 */
 (function () {
   "use strict";
 
@@ -12,6 +11,7 @@
   var wrap = document.createElement("div");
   wrap.id = "vmv-splash";
   wrap.innerHTML =
+    '<img class="vs-bgimg" src="/img/anime/mahoyo.jpg" alt="">' +
     '<video class="vs-bg" src="/img/ayaka.mp4" muted loop playsinline preload="auto"></video>' +
     '<div class="vs-shade"></div>' +
     '<div class="vs-petals"></div>' +
@@ -39,10 +39,15 @@
     petalBox.appendChild(petal);
   }
 
-  // 背景视频：muted 自动播放，失败则退回纯深色底
+  // 背景视频：就绪后淡入；加载失败则移除，留下静态图兜底
   var vid = wrap.querySelector(".vs-bg");
-  var vp = vid.play && vid.play();
-  if (vp && vp.catch) vp.catch(function () { vid.remove(); });
+  var vidReady = false;
+  vid.addEventListener("canplay", function () {
+    vidReady = true;
+    vid.classList.add("vs-ready");
+  });
+  var pp = vid.play && vid.play();
+  if (pp && pp.catch) pp.catch(function () { vid.remove(); });
 
   var term = wrap.querySelector(".vs-term");
   var granted = wrap.querySelector(".vs-granted");
@@ -75,29 +80,40 @@
   wrap.addEventListener("click", finish);
   document.addEventListener("keydown", finish);
 
-  var i = 0;
-  timer = setInterval(function () {
-    if (i >= lines.length) {
-      clearInterval(timer);
-      timer = null;
-      // 终端淡出，给 ACCESS GRANTED 让位
-      term.style.transition = "opacity 0.4s ease";
-      term.style.opacity = "0.12";
-      granted.classList.add("vs-show");
-      setTimeout(finish, 1700);
-      return;
-    }
-    var row = document.createElement("div");
-    row.className = "vs-line";
-    row.textContent = lines[i][0];
-    var ok = document.createElement("span");
-    ok.className = "vs-ok";
-    ok.textContent = lines[i][1];
-    row.appendChild(ok);
-    term.appendChild(row);
-    i++;
-  }, 300);
+  function startSequence() {
+    var i = 0;
+    timer = setInterval(function () {
+      if (i >= lines.length) {
+        clearInterval(timer);
+        timer = null;
+        term.style.transition = "opacity 0.4s ease";
+        term.style.opacity = "0.12";
+        granted.classList.add("vs-show");
+        setTimeout(finish, 1700);
+        return;
+      }
+      var row = document.createElement("div");
+      row.className = "vs-line";
+      row.textContent = lines[i][0];
+      var ok = document.createElement("span");
+      ok.className = "vs-ok";
+      ok.textContent = lines[i][1];
+      row.appendChild(ok);
+      term.appendChild(row);
+      i++;
+    }, 300);
+  }
 
-  // 保底：无论发生什么，6 秒后一定结束
-  setTimeout(finish, 6000);
+  // 等视频就绪再开始日志；视频慢/失败最多等 0.9 秒照常开始
+  var waited = 0;
+  var gate = setInterval(function () {
+    waited += 100;
+    if (vidReady || !vid.parentNode || waited >= 900) {
+      clearInterval(gate);
+      startSequence();
+    }
+  }, 100);
+
+  // 保底：无论发生什么，7 秒后一定结束
+  setTimeout(finish, 7000);
 })();

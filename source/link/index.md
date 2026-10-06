@@ -24,8 +24,8 @@ type: link
       avatar: https://foruda.gitee.com/avatar/1782995786228285340/15786671_asus_hacked_1782995786.png
     - name: 柯柯的博客
       link: https://keeygeen.cn
-      descr: 柯柯的个人博客（Aeolian Blog）
-      avatar: /img/keey.jpg
+      descr: 喵喵喵~ 喜欢折腾
+      avatar: https://keeygeen.cn/uploads/1785470476676_e711e358.jpg
 {% endflink %}
 
 {% flink %}
@@ -48,6 +48,30 @@ type: link
       link: https://www.butian.net
       descr: 漏洞响应平台
       avatar: https://www.butian.net/favicon.ico
+    - name: 先知社区
+      link: https://xz.aliyun.com
+      descr: 阿里云安全技术社区
+      avatar: https://xz.aliyun.com/favicon.ico
+    - name: FreeBuf
+      link: https://www.freebuf.com
+      descr: 网络安全专业媒体
+      avatar: https://www.freebuf.com/favicon.ico
+    - name: 看雪论坛
+      link: https://bbs.kanxue.com
+      descr: 逆向与二进制安全老牌社区
+      avatar: https://bbs.kanxue.com/favicon.ico
+    - name: 安全客
+      link: https://www.anquanke.com
+      descr: 有温度、有态度的安全资讯门户
+      avatar: https://www.anquanke.com/favicon.ico
+    - name: Bugku
+      link: https://www.bugku.com
+      descr: CTF 练习与在线靶场
+      avatar: https://www.bugku.com/favicon.ico
+    - name: CTFHub
+      link: https://www.ctfhub.com
+      descr: 渗透测试技能树与靶场
+      avatar: https://www.ctfhub.com/favicon.ico
 {% endflink %}
 
 ## 本站信息
