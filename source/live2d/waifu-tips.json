@@ -558,7 +558,7 @@
       "name": "初音未来",
       "message": "大家好！我是初音未来～今天也请多指教哦♪",
       "paths": [
-        "https://cdn.jsdelivr.net/gh/xiazeyu/live2d-widget-models@master/packages/live2d-widget-model-miku/assets/miku.model.json"
+        "/live2d/model-miku/miku.model.json"
       ]
     }
   ]
