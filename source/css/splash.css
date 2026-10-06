@@ -1,0 +1,185 @@
+/* VMV 进站启动动画 · 由 _config.butterfly.yml inject 引入
+   机制：head 内联脚本给 <html> 加 splash-running，::before 立即铺满屏幕
+   （正文 body 隐藏，杜绝闪烁）；/js/splash.js 往 documentElement 追加
+   #vmv-splash 舞台并播放动画，结束后加 splash-fade 淡出并清理。 */
+
+html.splash-running {
+  overflow: hidden;
+}
+
+html.splash-running body {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 淡出阶段：正文与遮罩交叉淡入，避免中间露出白底 */
+html.splash-fade body {
+  opacity: 1;
+  transition: opacity 0.55s ease;
+}
+
+html.splash-running::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 999998;
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(56, 189, 248, 0.08), transparent 60%),
+    linear-gradient(180deg, #07090f 0%, #0a0e17 60%, #07090f 100%);
+  transition: opacity 0.55s ease;
+}
+
+/* 扫描线质感 */
+html.splash-running #vmv-splash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.025) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+html.splash-fade::before,
+html.splash-fade #vmv-splash {
+  opacity: 0;
+}
+
+#vmv-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  opacity: 1;
+  transition: opacity 0.55s ease;
+  color: #e6f1ff;
+  cursor: pointer;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
+}
+
+#vmv-splash .vs-logo {
+  position: relative;
+  font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(44px, 9vw, 86px);
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  color: #e6f1ff;
+  text-shadow: 0 0 24px rgba(56, 189, 248, 0.35);
+  animation: vs-logo-in 0.6s ease-out both;
+}
+
+/* 故障（glitch）双色错位 */
+#vmv-splash .vs-logo::before,
+#vmv-splash .vs-logo::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+#vmv-splash .vs-logo::before {
+  color: #38bdf8;
+  animation: vs-glitch-a 1.3s steps(2, end) infinite;
+  clip-path: inset(20% 0 45% 0);
+}
+
+#vmv-splash .vs-logo::after {
+  color: #4ade80;
+  animation: vs-glitch-b 1.3s steps(2, end) infinite;
+  clip-path: inset(60% 0 10% 0);
+}
+
+#vmv-splash .vs-cursor {
+  display: inline-block;
+  width: 0.55em;
+  margin-left: 0.08em;
+  background: #4ade80;
+  animation: vs-blink 0.9s steps(1) infinite;
+}
+
+#vmv-splash .vs-term {
+  margin: 0;
+  font-size: clamp(12px, 2.2vw, 15px);
+  line-height: 2;
+  color: #8fa3bf;
+  min-height: 3.6em;
+}
+
+#vmv-splash .vs-line {
+  opacity: 0;
+  animation: vs-line-in 0.3s ease forwards;
+}
+
+#vmv-splash .vs-ok {
+  color: #4ade80;
+  padding-left: 6px;
+}
+
+#vmv-splash .vs-tip {
+  font-size: 12px;
+  color: #506078;
+  letter-spacing: 0.15em;
+  animation: vs-line-in 0.5s ease 1s both;
+}
+
+@keyframes vs-logo-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes vs-glitch-a {
+  0%, 100% { transform: none; }
+  25% { transform: translate(-3px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-2px, 2px); }
+}
+
+@keyframes vs-glitch-b {
+  0%, 100% { transform: none; }
+  25% { transform: translate(3px, -1px); }
+  50% { transform: translate(-2px, 1px); }
+  75% { transform: translate(2px, -2px); }
+}
+
+@keyframes vs-blink {
+  50% { opacity: 0; }
+}
+
+@keyframes vs-line-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #vmv-splash .vs-logo::before,
+  #vmv-splash .vs-logo::after,
+  #vmv-splash .vs-cursor {
+    animation: none;
+  }
+}
+
+@media print {
+  html.splash-running body,
+  html.splash-running #vmv-splash {
+    opacity: 1;
+  }
+  #vmv-splash {
+    display: none;
+  }
+}
