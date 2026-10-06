@@ -22,6 +22,10 @@ type: link
       link: https://blog.ss0t-hacked.top
       descr: 一个刚刚入门的 pwner，大手子 ddw
       avatar: https://foruda.gitee.com/avatar/1782995786228285340/15786671_asus_hacked_1782995786.png
+    - name: 柯柯的博客
+      link: https://keeygeen.cn
+      descr: 柯柯的个人博客（Aeolian Blog）
+      avatar: /img/keey.jpg
 {% endflink %}
 
 {% flink %}
