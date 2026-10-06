@@ -133,9 +133,13 @@
   bottom: 0 !important;
 }
 
+#waifu {
+  height: 320px !important;
+}
+
 #waifu #live2d {
-  width: 220px !important;
-  height: 250px !important;
+  width: 240px !important;
+  height: 320px !important;
 }
 
 /* 看板娘：隐藏那排拍照/换装/关闭的圆形工具按钮（太丑），保留人物与气泡 */
