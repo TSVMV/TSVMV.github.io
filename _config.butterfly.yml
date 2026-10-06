@@ -1086,7 +1086,7 @@ inject:
     - <script src="/js/bgm.js?v=20261006c"></script>
     - <script src="/js/mouse-trail.js?v=20261006c"></script>
     - >-
-      <script>(function(){if(window.__vmvWaifuDone&&document.getElementById("waifu"))return;window.__vmvWaifuDone=1;var p="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/";function load(u,t){return new Promise(function(res,rej){var tag;if(t==="css"){tag=document.createElement("link");tag.rel="stylesheet";tag.href=u}else{tag=document.createElement("script");tag.type="module";tag.src=u}tag.onload=function(){res(1)};tag.onerror=function(){rej(u)};document.head.appendChild(tag)})}Promise.all([load(p+"waifu.css","css"),load(p+"waifu-tips.js","js")]).then(function(){if(window.initWidget){window.initWidget({waifuPath:"/live2d/waifu-tips.json",tools:[],drag:false,logLevel:"warn"})}}).catch(function(){})})();</script>
+      <script>(function(){if(window.__vmvWaifuDone&&document.getElementById("waifu"))return;window.__vmvWaifuDone=1;var p="https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/";function load(u,t){return new Promise(function(res,rej){var tag;if(t==="css"){tag=document.createElement("link");tag.rel="stylesheet";tag.href=u}else{tag=document.createElement("script");tag.type="module";tag.src=u}tag.onload=function(){res(1)};tag.onerror=function(){rej(u)};document.head.appendChild(tag)})}Promise.all([load(p+"waifu.css","css"),load(p+"waifu-tips.js","js")]).then(function(){if(window.initWidget){window.initWidget({waifuPath:"/live2d/waifu-tips.json",tools:[],drag:false,logLevel:"warn",cubism2Path:"https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.1/dist/live2d.min.js"})}}).catch(function(){})})();</script>
 
 # CDN Settings
 # Don't modify the following settings unless you know how they work
