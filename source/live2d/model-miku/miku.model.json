@@ -1,1 +1,81 @@
-{"version":"Sample 1.0.0","model":"moc/miku.moc","textures":["moc/miku.2048/texture_00.png"],"motions":{"null":[{"file":"mtn/miku_m_01.mtn"},{"file":"mtn/miku_m_02.mtn"},{"file":"mtn/miku_m_03.mtn"},{"file":"mtn/miku_m_04.mtn"},{"file":"mtn/miku_m_05.mtn"},{"file":"mtn/miku_m_06.mtn"},{"file":"mtn/miku_shake_01.mtn"}],"idle":[{"file":"mtn/miku_idle_01.mtn"}]},"physics":"miku.physics.json"}
+{
+  "version": "Sample 1.0.0",
+  "model": "moc/miku.moc",
+  "textures": [
+    "moc/miku.2048/texture_00.png"
+  ],
+  "motions": {
+    "null": [
+      {
+        "file": "mtn/miku_m_01.mtn"
+      },
+      {
+        "file": "mtn/miku_m_02.mtn"
+      },
+      {
+        "file": "mtn/miku_m_03.mtn"
+      },
+      {
+        "file": "mtn/miku_m_04.mtn"
+      },
+      {
+        "file": "mtn/miku_m_05.mtn"
+      },
+      {
+        "file": "mtn/miku_m_06.mtn"
+      },
+      {
+        "file": "mtn/miku_shake_01.mtn"
+      }
+    ],
+    "idle": [
+      {
+        "file": "mtn/miku_idle_01.mtn"
+      }
+    ],
+    "TapBody": [
+      {
+        "file": "mtn/miku_m_01.mtn"
+      },
+      {
+        "file": "mtn/miku_m_02.mtn"
+      },
+      {
+        "file": "mtn/miku_shake_01.mtn"
+      }
+    ],
+    "HeadTap": [
+      {
+        "file": "mtn/miku_m_03.mtn"
+      }
+    ],
+    "TapHead": [
+      {
+        "file": "mtn/miku_m_03.mtn"
+      }
+    ]
+  },
+  "physics": "miku.physics.json",
+  "layout": {
+    "height": 2,
+    "center_y": -0.05
+  },
+  "hit_areas_custom": {
+    "Head_x": [
+      0,
+      0
+    ],
+    "Head_y": [
+      0,
+      0
+    ],
+    "Body_x": [
+      -10,
+      10
+    ],
+    "Body_y": [
+      -10,
+      10
+    ]
+  }
+}
