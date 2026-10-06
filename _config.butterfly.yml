@@ -1073,18 +1073,18 @@ css_prefix: true
 # Insert the code to head (before '</head>' tag) and the bottom (before '</body>' tag)
 inject:
   head:
-    - <link rel="stylesheet" href="/css/splash.css?v=20261006c">
-    - <link rel="stylesheet" href="/css/anime.css?v=20261006c">
+    - <link rel="stylesheet" href="/css/splash.css?v=20261006d">
+    - <link rel="stylesheet" href="/css/anime.css?v=20261006d">
     - <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
     - >-
       <script>try{if(navigator.serviceWorker){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(window.caches&&caches.keys){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}}catch(e){}</script>
     - >-
       <script>(function(){var el=document.documentElement;var ref=document.referrer||"";var same=false;try{same=!!ref&&new URL(ref).host===location.host}catch(e){}if(same)return;el.classList.add("splash-running");setTimeout(function(){el.classList.remove("splash-running")},6500)})();</script>
   bottom:
-    - <script src="/js/splash.js?v=20261006c"></script>
+    - <script src="/js/splash.js?v=20261006d"></script>
     - <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
-    - <script src="/js/bgm.js?v=20261006c"></script>
-    - <script src="/js/mouse-trail.js?v=20261006c"></script>
+    - <script src="/js/bgm.js?v=20261006d"></script>
+    - <script src="/js/mouse-trail.js?v=20261006d"></script>
     - >-
       <script>(function(){if(window.__vmvWaifuDone&&document.getElementById("waifu"))return;window.__vmvWaifuDone=1;var p="/live2d/";function load(u,t){return new Promise(function(res,rej){var tag;if(t==="css"){tag=document.createElement("link");tag.rel="stylesheet";tag.href=u}else{tag=document.createElement("script");tag.type="module";tag.src=u}tag.onload=function(){res(1)};tag.onerror=function(){rej(u)};document.head.appendChild(tag)})}Promise.all([load(p+"waifu.css","css"),load(p+"waifu-tips.js","js")]).then(function(){if(window.initWidget){window.initWidget({waifuPath:"/live2d/waifu-tips.json",tools:[],drag:false,logLevel:"warn",cubism2Path:"/live2d/live2d.min.js"})}}).catch(function(){})})();</script>
 
