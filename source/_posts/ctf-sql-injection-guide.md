@@ -3,7 +3,7 @@ title: SQL注入讲解—高级注入技术与WAF深度绕过
 date: 2026-09-12 16:00:00
 categories: [CTF]
 tags: [CTF, Web安全]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg10.jpg
+cover: /img/anime/starsea.jpg
 ---
 
 ## 从基础到高级的分水岭

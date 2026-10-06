@@ -3,7 +3,7 @@ title: vscseny：本地静态代码扫描，你的代码有没有危险调用
 date: 2026-09-25 12:00:00
 categories: [运维开发]
 tags: [代码审计, 静态分析, 安全, Go, 工具]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg56.jpg
+cover: /img/anime/mahoyo.jpg
 ---
 
 写代码的时候，有些函数调用本身就是危险信号——strcpy、system、eval、硬编码的密钥、弱加密算法。CodeQL 和 SonarQube 功能强，但部署重、要联网、对个人项目来说太重了。

@@ -3,7 +3,7 @@ title: 青岑密码学题集 WP
 date: 2026-09-21 17:30:00
 categories: [CTF]
 tags: [CTF, 密码学, WP]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg51.jpg
+cover: /img/anime/mahoyo.jpg
 ---
 
 ## 写在前面

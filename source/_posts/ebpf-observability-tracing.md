@@ -3,7 +3,7 @@ title: eBPF 可观测性实战：从零编写系统调用追踪工具
 date: 2026-09-13 02:00:00
 categories: [系统&内核]
 tags: [Linux, eBPF]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg17.jpg
+cover: /img/anime/mahoyo.jpg
 ---
 
 ## eBPF 是什么

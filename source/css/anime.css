@@ -51,23 +51,89 @@
   box-shadow: 0 8px 22px rgba(255, 124, 156, 0.22);
 }
 
-/* 背景音乐播放器：按要求不可关闭 —— 缩小到左下角小圆盘、
- * 禁止交互（点不到就无法暂停/关闭），列表不弹出。
- * 注意：#vmv-bgm 容器本身就是 .aplayer-fixed 根元素 */
-#vmv-bgm .aplayer-body {
-  width: auto !important;
-  left: 6px !important;
-  bottom: 6px !important;
-  transform: scale(0.42);
-  transform-origin: left bottom;
-  pointer-events: none;
-  opacity: 0.8;
+/* 背景音乐播放器：按要求不可关闭 —— APlayer 原生 UI 全部隐藏，
+ * 根元素白底也一并去掉（否则左下角会露出一个白色方块），
+ * 用一枚会呼吸跳动的粉色音符小圆片代替（纯装饰，点不到 = 关不掉） */
+#vmv-bgm,
+#vmv-bgm.aplayer {
+  background: transparent !important;
+  box-shadow: none !important;
+  width: 0;
+  height: 0;
+  margin: 0;
+  border: none;
 }
 
-#vmv-bgm .aplayer-notice,
-#vmv-bgm .aplayer-miniswitcher,
-#vmv-bgm .aplayer-list {
+#vmv-bgm .aplayer-body,
+#vmv-bgm .aplayer-list,
+#vmv-bgm .aplayer-notice {
   display: none !important;
+}
+
+#vmv-bgm::after {
+  content: "♪";
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 999;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffb7d5, #ff7c9c);
+  color: #fff;
+  font-size: 15px;
+  font-family: sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(255, 124, 156, 0.45);
+  pointer-events: none;
+  animation: vmv-note-bounce 1.6s ease-in-out infinite;
+}
+
+@keyframes vmv-note-bounce {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-5px) rotate(6deg); }
+}
+
+/* 页脚：FRIEND LINKS 快捷区 + 终端风装饰行（借鉴朋友的 CTF WriteUp 博客） */
+.vmv-footer-links {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.vmv-footer-title {
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ff7c9c;
+}
+
+.vmv-footer-links a {
+  color: inherit;
+  border-bottom: 1px dashed rgba(255, 124, 156, 0.6);
+  transition: color 0.2s ease;
+}
+
+.vmv-footer-links a:hover {
+  color: #ff7c9c;
+}
+
+.vmv-footer-term {
+  margin-top: 4px;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #4ade80;
+  opacity: 0.85;
+}
+
+.vmv-term-cursor {
+  animation: vmv-blink 1s steps(1) infinite;
+}
+
+@keyframes vmv-blink {
+  50% { opacity: 0; }
 }
 
 /* 页脚小樱花 */

@@ -14,6 +14,18 @@ type: link
       link: https://ctf.qingcen.net
       descr: 青岑CTF — CTF 竞赛练习与竞技平台
       avatar: https://ctf.qingcen.net/favicon.png
+    - name: CTF WriteUp
+      link: https://heliumsenbrg.github.io/ctf-writeup-blog/
+      descr: Web 安全 Writeup 与知识库 · 一血收割机
+      avatar: https://heliumsenbrg.github.io/ctf-writeup-blog/favicon.svg
+    - name: 懒羊羊大佬
+      link: https://yangleduo0629-cloud.github.io/-/#/
+      descr: 朋友的博客，欢迎来玩
+      avatar: https://yangleduo0629-cloud.github.io/-/favicon.svg
+    - name: 累了
+      link: https://cd835.github.io/ZS/
+      descr: 朋友的博客，欢迎来玩
+      avatar: https://img2024.cnblogs.com/blog/3838669/202608/3838669-20260808002752655-626617498.jpg
 {% endflink %}
 
 ## 本站信息
@@ -36,9 +48,3 @@ type: link
 ✉️ **[邮件申请](mailto:3347123386@qq.com?subject=%E5%8F%8B%E9%93%BE%E7%94%B3%E8%AF%B7&body=-%20%E7%BD%91%E7%AB%99%E5%90%8D%E7%A7%B0%EF%BC%9A%0D%0A-%20%E7%BD%91%E7%AB%99%E5%9C%B0%E5%9D%80%EF%BC%9A%0D%0A-%20%E7%BD%91%E7%AB%99%E6%8F%8F%E8%BF%B0%EF%BC%9A%0D%0A-%20%E5%A4%B4%E5%83%8F%E5%9C%B0%E5%9D%80%EF%BC%9A%0D%0A%EF%BC%88%E8%AF%B7%E7%A1%AE%E4%BF%9D%E6%9C%AC%E7%AB%99%E5%B7%B2%E5%87%BA%E7%8E%B0%E5%9C%A8%E4%BD%A0%E7%9A%84%E5%8F%8B%E9%93%BE%E5%88%97%E8%A1%A8%E4%B8%AD%EF%BC%89)**
 
 也可以直接在下方评论区留言申请（Giscus 评论）。
-
-## 常见要求
-
-- 站点内容健康、稳定可访问，主题以技术 / CTF / 开发 / 生活记录为主；
-- 有 https（推荐）、无大量弹窗广告；
-- 博客类站点建议持续更新超过 1 个月，且已添加本站友链。

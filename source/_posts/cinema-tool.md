@@ -3,7 +3,7 @@ title: cinema：把二进制执行过程变成可回放的电影
 date: 2026-09-25 11:00:00
 categories: [系统&内核]
 tags: [逆向, pwn, 二进制, trace, Unicorn]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg54.jpg
+cover: /img/anime/sakura-volcano.jpg
 ---
 
 调试二进制的时候，经常会想"刚才那一步寄存器是什么样的"。strace 能告诉你发生了什么系统调用，但没法回答某一帧的完整状态——寄存器、内存、调用栈，以及它和前后帧的关系。gdb 能单步，但往前退一步几乎不可能。

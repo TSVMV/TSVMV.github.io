@@ -3,7 +3,7 @@ title: 后缀数组(SA)详解—从倍增法到 LCP 应用
 date: 2026-09-16 23:00:00
 categories: [CTF]
 tags: [CTF, 算法, 字符串]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg48.jpg
+cover: /img/anime/grass.jpg
 ---
 
 后缀数组（Suffix Array, SA）是字符串处理的另一大杀器。和 SAM 相比，SA 写起来简单一些，功能也覆盖了大部分字符串问题：不同子串个数、最长公共子串、出现次数统计、模式匹配。

@@ -3,7 +3,7 @@ title: vllixn：一条命令给 Linux 主机做安全体检
 date: 2026-09-25 11:30:00
 categories: [运维开发]
 tags: [Linux, 安全, 运维, 蓝队, 基线]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg55.jpg
+cover: /img/anime/lily-valley.jpg
 ---
 
 管服务器的时候，经常需要快速判断一台机器安不安全。网上的基线检查工具不少，但要么依赖一堆第三方库，要么输出英文报告看不懂，要么会偷偷改你系统配置。

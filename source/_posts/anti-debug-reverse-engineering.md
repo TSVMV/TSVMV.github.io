@@ -3,7 +3,7 @@ title: 反调试与反反调试技巧详解—从原理到实战
 date: 2026-09-16 20:30:00
 categories: [系统&内核]
 tags: [逆向, 安全, Windows]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg44.jpg
+cover: /img/anime/horse-girl.jpg
 ---
 
 做逆向分析的人都绕不开反调试。CTF Pwn 题里经常埋各种反调试，商业软件更是把反调试做成了一套体系。你不会反反调试，连主函数都看不到。

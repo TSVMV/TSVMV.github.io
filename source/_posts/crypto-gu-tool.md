@@ -3,7 +3,7 @@ title: crypto-gu：纯标准库密码学工具箱，原语和攻击放在同一�
 date: 2026-09-25 10:30:00
 categories: [系统&内核]
 tags: [密码学, RSA, AES, ECC, 攻击, Python]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg53.jpg
+cover: /img/anime/lily-valley.jpg
 ---
 
 做 CTF 密码学题的时候，经常需要自己实现一些原语或者攻击。pycryptodome 能加密解密，但攻击（padding oracle、共模攻击、Wiener 这些）得自己写。每次比赛翻以前的 exp 复制粘贴，时间长了就想把这些东西整理成一个库。

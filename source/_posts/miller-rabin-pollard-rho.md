@@ -3,7 +3,7 @@ title: Miller-Rabin 素性测试与 Pollard's Rho 分解详解
 date: 2026-09-16 21:30:00
 categories: [CTF]
 tags: [CTF, 密码学, 数论]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg45.jpg
+cover: /img/anime/grass.jpg
 ---
 
 大数分解是 RSA 密码学的命门。CTF 密码学题里，给你一个几百位的 n 让你分解，你总不能从 2 试到 √n 吧？这时候就需要 Miller-Rabin 判断是不是质数，Pollard's Rho 做概率分解。

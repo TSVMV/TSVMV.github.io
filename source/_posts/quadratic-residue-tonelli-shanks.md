@@ -3,7 +3,7 @@ title: 二次剩余与 Tonelli-Shanks 算法详解
 date: 2026-09-16 19:30:00
 categories: [CTF]
 tags: [CTF, 密码学, 数论]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg42.jpg
+cover: /img/anime/mahoyo.jpg
 ---
 
 二次剩余（Quadratic Residue）是 CTF 密码学里的高频考点。RSA 中解密需要求模 n 的平方根，ECDSA 签名验证涉及二次剩余判定， even 简单的"猜数"题都可能藏着 Legendre 符号的套路。

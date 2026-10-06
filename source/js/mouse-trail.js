@@ -5,7 +5,6 @@
 
   if (!window.matchMedia) return;
   if (window.matchMedia("(hover: none)").matches) return;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
   var canvas = document.createElement("canvas");
   canvas.id = "vmv-trail";
@@ -29,20 +28,20 @@
 
   window.addEventListener("pointermove", function (e) {
     if (e.pointerType === "touch") return;
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < 3; i++) {
       parts.push({
-        x: e.clientX + (Math.random() - 0.5) * 10,
-        y: e.clientY + (Math.random() - 0.5) * 10,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: 0.5 + Math.random() * 0.9,
-        r: 3 + Math.random() * 4,
+        x: e.clientX + (Math.random() - 0.5) * 14,
+        y: e.clientY + (Math.random() - 0.5) * 14,
+        vx: (Math.random() - 0.5) * 0.9,
+        vy: 0.5 + Math.random() * 1.1,
+        r: 4 + Math.random() * 5,
         a: 1,
         rot: Math.random() * Math.PI,
-        vr: (Math.random() - 0.5) * 0.12,
+        vr: (Math.random() - 0.5) * 0.14,
         c: colors[(Math.random() * colors.length) | 0]
       });
     }
-    if (parts.length > 150) parts.splice(0, parts.length - 150);
+    if (parts.length > 220) parts.splice(0, parts.length - 220);
   });
 
   (function loop() {

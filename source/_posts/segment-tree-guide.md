@@ -3,7 +3,7 @@ title: 线段树详解—从单点修改到区间操作
 date: 2026-09-16 22:00:00
 categories: [CTF]
 tags: [CTF, 算法, 数据结构]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg46.jpg
+cover: /img/anime/horse-girl.jpg
 ---
 
 线段树是竞赛算法中最常用的数据结构之一。它把数组按区间分治组织，让单点修改、区间查询、区间修改都能在 O(log n) 时间完成。CTF 中的 Misc、逆向、甚至部分 Pwn 题都可能用到。

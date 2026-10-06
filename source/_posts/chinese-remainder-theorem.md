@@ -3,7 +3,7 @@ title: 中国剩余定理(CRT)详解—从孙子定理到 RSA 应用
 date: 2026-09-16 22:30:00
 categories: [CTF]
 tags: [CTF, 密码学, 数论]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg47.jpg
+cover: /img/anime/grass.jpg
 ---
 
 "有物不知其数，三三数之剩二，五五数之剩三，七七数之剩二，问物几何？"——《孙子算经》

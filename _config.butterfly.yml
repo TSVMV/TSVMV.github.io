@@ -71,16 +71,16 @@ avatar:
 disable_top_img: false
 
 # If the banner of page not setting, it will show the default_top_img
-default_top_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/banner2.jpg
+default_top_img: /img/anime/mahoyo.jpg
 
 # The banner image of index page
-index_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/banner.jpg
+index_img: /img/anime/town-girls.jpg
 
 # The banner image of archive page
-archive_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg4.jpg
+archive_img: /img/anime/sakura-volcano.jpg
 
 # Note: tag page, not tags page
-tag_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg6.jpg
+tag_img: /img/anime/forest.jpg
 
 # The banner image of tag page, you can set the banner image for each tag
 # Format:
@@ -88,7 +88,7 @@ tag_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg6.j
 tag_per_img:
 
 # Note: category page, not categories page
-category_img: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg5.jpg
+category_img: /img/anime/grass.jpg
 
 # The banner image of category page, you can set the banner image for each category
 # Format:
@@ -101,7 +101,7 @@ footer_img: false
 # Website Background
 # Can set it to color, image URL or an array containing colors and/or image URLs
 # If an array is provided, a random background will be selected from the array on each load
-background: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg.jpg
+background: /img/anime/5cm.jpg
 
 cover:
   # Disable the cover or not
@@ -110,18 +110,26 @@ cover:
   archives_enable: true
   # When cover is not set, the default cover is displayed
   default_cover:
-    # - xxx.jpg
+    - /img/anime/5cm.jpg
+    - /img/anime/grass.jpg
+    - /img/anime/sakura-volcano.jpg
+    - /img/anime/lily-valley.jpg
+    - /img/anime/town-girls.jpg
+    - /img/anime/mahoyo.jpg
+    - /img/anime/forest.jpg
+    - /img/anime/starsea.jpg
+    - /img/anime/horse-girl.jpg
 
 # Replace Broken Images
 error_img:
-  flink: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg21.jpg
-  post_page: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg22.jpg
+  flink: /img/anime/starmountain.jpg
+  post_page: /img/anime/horse-girl.jpg
 
 # A simple 404 page
 error_404:
   enable: true
   subtitle: 'Page Not Found'
-  background: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/banner.jpg
+  background: /img/anime/starsea.jpg
 
 post_meta:
   # Home Page
@@ -275,7 +283,7 @@ footer:
   copyright:
     enable: false
     version: false
-  custom_text: '<p>© 2026 VMV | 抖音: VMV_SRC | QQ: VMVflag | 邮箱: 3347123386@qq.com</p>'
+  custom_text: '<p>© 2026 VMV | 抖音: VMV_SRC | QQ: VMVflag | 邮箱: 3347123386@qq.com</p><p class="vmv-footer-links"><span class="vmv-footer-title">FRIEND LINKS</span> ─ <a href="/link/">友链索引</a> · <a href="https://heliumsenbrg.github.io/ctf-writeup-blog/" target="_blank" rel="noopener">CTF WriteUp</a> · <a href="https://yangleduo0629-cloud.github.io/-/#/" target="_blank" rel="noopener">懒羊羊大佬</a> · <a href="https://cd835.github.io/ZS/" target="_blank" rel="noopener">累了</a></p><p class="vmv-footer-term">▶ SYSTEM_ONLINE <span class="vmv-term-cursor">▮</span></p>'
 
 # --------------------------------------
 # Aside Settings
@@ -1069,12 +1077,15 @@ inject:
     - <link rel="stylesheet" href="/css/anime.css">
     - <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
     - >-
-      <script>(function(){var el=document.documentElement;try{if(sessionStorage.getItem("vmv-splash-done"))return;sessionStorage.setItem("vmv-splash-done","1")}catch(e){return}if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;el.classList.add("splash-running");setTimeout(function(){el.classList.remove("splash-running")},4000)})();</script>
+      <script>(function(){var el=document.documentElement;try{if(sessionStorage.getItem("vmv-splash-done"))return;sessionStorage.setItem("vmv-splash-done","1")}catch(e){return}el.classList.add("splash-running");setTimeout(function(){el.classList.remove("splash-running")},4000)})();</script>
   bottom:
     - <script src="/js/splash.js"></script>
     - <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
     - <script src="/js/bgm.js"></script>
     - <script src="/js/mouse-trail.js"></script>
+    - >-
+      <script>window.live2d_settings={modelStorage:true,waifuSize:"230x260",waifuEdgeSide:"right:10",waifuDraggable:"disable",showToolMenu:false};</script>
+    - <script src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>
 
 # CDN Settings
 # Don't modify the following settings unless you know how they work

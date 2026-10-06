@@ -3,7 +3,7 @@ title: elfpeek：把 ELF/PE 二进制拆成一张结构图
 date: 2026-09-25 10:00:00
 categories: [运维开发]
 tags: [逆向, ELF, PE, 二进制, 工具]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg52.jpg
+cover: /img/anime/forest.jpg
 ---
 
 做逆向的时候，拿到一个二进制第一件事就是搞清楚它的骨架——哪些节区、入口在哪、依赖什么库、开了哪些加固。readelf 和 objdump 能用，但输出是纯文本，节区在文件里占多大比例、内存里怎么映射，全靠脑补。

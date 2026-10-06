@@ -10,9 +10,6 @@
   var html = document.documentElement;
   if (!html.classList.contains("splash-running")) return;
 
-  var reduced = window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
   var wrap = document.createElement("div");
   wrap.id = "vmv-splash";
   wrap.innerHTML =
@@ -64,14 +61,6 @@
     }, 600);
   }
 
-  if (reduced) {
-    finish();
-    return;
-  }
-
-  wrap.addEventListener("click", finish);
-  document.addEventListener("keydown", finish);
-
   var i = 0;
   timer = setInterval(function () {
     if (i >= lines.length) {
@@ -90,6 +79,9 @@
     term.appendChild(row);
     i++;
   }, 240);
+
+  wrap.addEventListener("click", finish);
+  document.addEventListener("keydown", finish);
 
   // 保底：无论发生什么，3 秒后一定结束
   setTimeout(finish, 3000);

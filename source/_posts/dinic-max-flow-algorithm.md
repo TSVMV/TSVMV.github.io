@@ -3,7 +3,7 @@ title: Dinic 网络流算法详解—从原理到竞赛实战
 date: 2026-09-16 20:00:00
 categories: [CTF]
 tags: [CTF, 算法, 图论]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg43.jpg
+cover: /img/anime/sakura-volcano.jpg
 ---
 
 网络流是图论中最实用的算法之一。最大流最小割定理把"求最大流"和"求最小割"等价起来，于是大量看似和流没关系的问题——二分图匹配、边连通度、选边方案、拆点建模——都能套上网络流的框架。

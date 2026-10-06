@@ -3,7 +3,7 @@ title: Reverse讲解—高级逆向技术与反混淆实战
 date: 2026-09-12 19:00:00
 categories: [CTF]
 tags: [CTF, Reverse]
-cover: https://cdn.jsdelivr.net/gh/TSVMV/TSVMV.github.io@main/source/img/bg13.jpg
+cover: /img/anime/forest.jpg
 ---
 
 ## 逆向工程的进阶视角
