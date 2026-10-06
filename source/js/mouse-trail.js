@@ -6,6 +6,12 @@
   if (!window.matchMedia) return;
   if (window.matchMedia("(hover: none)").matches) return;
 
+  // pjax 站内导航：画布挂在 window 上做单例，换页时重新挂回新 body
+  if (window.__vmvTrail) {
+    (document.body || document.documentElement).appendChild(window.__vmvTrail);
+    return;
+  }
+
   var canvas = document.createElement("canvas");
   canvas.id = "vmv-trail";
   canvas.setAttribute(
@@ -13,6 +19,7 @@
     "position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:999997"
   );
   (document.body || document.documentElement).appendChild(canvas);
+  window.__vmvTrail = canvas;
 
   var ctx = canvas.getContext("2d");
   var W, H;

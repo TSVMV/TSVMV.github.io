@@ -4,9 +4,29 @@
  * 浏览器自动播放策略会拦截无手势的 play()：初始化试一次，
  * 若未成功，首次交互（点击/按键/滚轮/触摸）再强制播放。
  * 播放器按钮已被 anime.css 隐藏（按要求不可关闭），循环播放。
- */
+ * pjax 说明：Butterfly 站内导航会重新执行本脚本，因此把播放器
+ * 实例挂在 window 上做单例——pjax 换页时 audio（不在 DOM 里）
+ * 继续播放不中断，只补回被换掉的指示器容器。 */
 (function () {
   "use strict";
+
+  function ensureIndicator() {
+    var c = document.getElementById("vmv-bgm");
+    if (!c) {
+      c = document.createElement("div");
+      c.id = "vmv-bgm";
+      (document.body || document.documentElement).appendChild(c);
+    }
+  }
+
+  // pjax 站内导航：音乐继续，不重建
+  if (window.__vmvBgmPlayer) {
+    ensureIndicator();
+    return;
+  }
+
+  if (typeof window.APlayer !== "function") return;
+  ensureIndicator();
 
   var API = "https://api.injahow.cn/meting/?server=netease&type=song&id=";
   var SONGS = [
@@ -17,8 +37,6 @@
     "426881487"   // 前前前世 (movie ver.) - RADWIMPS
   ];
 
-  if (typeof window.APlayer !== "function") return;
-
   Promise.all(
     SONGS.map(function (id) {
       return fetch(API + id)
@@ -27,6 +45,8 @@
         .catch(function () { return null; });
     })
   ).then(function (list) {
+    // pjax 快速切换时可能已经建好，避免双实例
+    if (window.__vmvBgmPlayer) return;
     var audios = list.filter(function (s) { return s && s.url; }).map(function (s) {
       return {
         name: s.name,
@@ -37,9 +57,8 @@
     });
     if (!audios.length) return;
 
-    var container = document.createElement("div");
-    container.id = "vmv-bgm";
-    document.body.appendChild(container);
+    var container = document.getElementById("vmv-bgm");
+    if (!container) return;
 
     var player = new APlayer({
       container: container,
@@ -52,6 +71,7 @@
       theme: "#ff7c9c",
       audio: audios
     });
+    window.__vmvBgmPlayer = player;
 
     function play() {
       try { player.play(); } catch (e) {}
