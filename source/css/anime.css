@@ -126,20 +126,13 @@
   50% { transform: translateY(-5px) rotate(6deg); }
 }
 
-/* 看板娘：定位右下角、无工具栏；台词改 source/live2d/waifu-tips.json */
+/* 看板娘：只调位置到右下角；尺寸交给组件默认 300x300 等比画布，
+ * 强制长宽比会导致模型裁头、气泡错位、点击命中偏移 */
 #waifu {
   left: auto !important;
   right: 10px !important;
   bottom: 0 !important;
-}
-
-#waifu {
-  height: 320px !important;
-}
-
-#waifu #live2d {
-  width: 240px !important;
-  height: 320px !important;
+  z-index: 998 !important;
 }
 
 /* 看板娘：隐藏那排拍照/换装/关闭的圆形工具按钮（太丑），保留人物与气泡 */
