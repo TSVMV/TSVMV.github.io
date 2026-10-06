@@ -18,6 +18,10 @@ type: link
       link: https://cd835.github.io/ZS/
       descr: 朋友的博客，欢迎来玩
       avatar: https://img2024.cnblogs.com/blog/3838669/202608/3838669-20260808002752655-626617498.jpg
+    - name: HACKED
+      link: https://blog.ss0t-hacked.top
+      descr: 一个刚刚入门的 pwner，大手子 ddw
+      avatar: https://foruda.gitee.com/avatar/1782995786228285340/15786671_asus_hacked_1782995786.png
 {% endflink %}
 
 {% flink %}
