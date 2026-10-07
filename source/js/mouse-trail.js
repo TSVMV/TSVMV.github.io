@@ -52,25 +52,7 @@
     if (parts.length > 220) parts.splice(0, parts.length - 220);
   });
 
-  // 全站常驻樱花雨：每隔一阵从顶部飘落几片，重度二次元氛围
-  setInterval(function () {
-    if (document.hidden) return;
-    for (var i = 0; i < 3; i++) {
-      parts.push({
-        x: Math.random() * window.innerWidth,
-        y: -10,
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: 0.6 + Math.random() * 0.9,
-        r: 4 + Math.random() * 5,
-        a: 0.85,
-        rot: Math.random() * Math.PI,
-        vr: (Math.random() - 0.5) * 0.1,
-        c: colors[(Math.random() * colors.length) | 0],
-        env: true
-      });
-    }
-    if (parts.length > 320) parts.splice(0, parts.length - 320);
-  }, 900);
+  // 环境漂浮物（樱花雨/星星/光斑/气泡）已移交 vvm-ambient.js
 
   (function loop() {
     ctx.clearRect(0, 0, W, H);

@@ -1084,7 +1084,8 @@ inject:
     - <script src="/js/splash.js?v=20261006d"></script>
     - <script src="/lib/aplayer/APlayer.min.js"></script>
     - <script src="/js/bgm.js?v=20261006d"></script>
-    - <script src="/js/mouse-trail.js?v=20261006d"></script>
+    - <script src="/js/mouse-trail.js?v=20261007a"></script>
+    - <script src="/js/vvm-ambient.js?v=20261007a"></script>
     - >-
       <script>(function(){if(window.__vmvWaifuDone&&document.getElementById("waifu"))return;window.__vmvWaifuDone=1;var p="/live2d/";function load(u,t){return new Promise(function(res,rej){var tag;if(t==="css"){tag=document.createElement("link");tag.rel="stylesheet";tag.href=u}else{tag=document.createElement("script");tag.type="module";tag.src=u}tag.onload=function(){res(1)};tag.onerror=function(){rej(u)};document.head.appendChild(tag)})}Promise.all([load(p+"waifu.css","css"),load(p+"waifu-tips.js","js")]).then(function(){if(window.initWidget){window.initWidget({waifuPath:"/live2d/waifu-tips.json",tools:[],drag:false,logLevel:"warn",cubism2Path:"/live2d/live2d.min.js"})}}).catch(function(){})})();</script>
     - <script src="/js/waifu-interact.js?v=20261006d"></script>
