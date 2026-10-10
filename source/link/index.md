@@ -72,6 +72,30 @@ type: link
       link: https://www.ctfhub.com
       descr: 渗透测试技能树与靶场
       avatar: https://www.ctfhub.com/favicon.ico
+    - name: 蓝莲杯
+      link: https://www.4ho.cn
+      descr: 网络安全社区与实战比赛
+      avatar: https://www.4ho.cn/favicon.ico
+    - name: CNNVD
+      link: https://www.cnnvd.org.cn
+      descr: 国家信息安全漏洞共享平台
+      avatar: https://www.cnnvd.org.cn/favicon.ico
+    - name: 掘金
+      link: https://juejin.cn
+      descr: 技术内容创作与分享社区
+      avatar: https://juejin.cn/favicon.ico
+    - name: MDN Web Docs
+      link: https://developer.mozilla.org
+      descr: Web 前端权威技术文档
+      avatar: https://developer.mozilla.org/favicon.ico
+    - name: Docker 文档
+      link: https://docs.docker.com
+      descr: 容器化技术官方文档
+      avatar: https://docs.docker.com/favicon.ico
+    - name: GitLab
+      link: https://gitlab.com
+      descr: 开源代码托管与 CI/CD
+      avatar: https://gitlab.com/favicon.ico
 {% endflink %}
 
 ## 本站信息

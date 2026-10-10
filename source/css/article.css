@@ -1,0 +1,245 @@
+/* VMV 文章阅读体验：正文排版、标题装饰、引用/代码/表格/图片统一风格
+ * 全部走主题 CSS 变量并带浅色 fallback，暗色模式自动适配。 */
+
+#post .post-block,
+#post {
+  border-radius: 18px;
+}
+
+/* 正文排版：稍大字号、宽行距、段落呼吸感 */
+#post .post-content {
+  font-size: 15.5px;
+  line-height: 1.95;
+  color: var(--content-body-color, #3a3a3a);
+  letter-spacing: 0.01em;
+  word-break: break-word;
+}
+
+#post .post-content p {
+  margin: 1em 0;
+}
+
+/* 小标题：粉色渐变左条 + 下划线提示 */
+#post .post-content h2,
+#post .post-content h3,
+#post .post-content h4 {
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 1.9em 0 0.9em;
+}
+
+#post .post-content h2 {
+  padding-left: 13px;
+  border-left: 4px solid #ff7c9c;
+  position: relative;
+}
+
+#post .post-content h2::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  height: 60%;
+  width: 4px;
+  background: linear-gradient(180deg, #ff8fb8, #ffb7d5);
+  border-radius: 2px;
+}
+
+#post .post-content h3 {
+  padding-left: 10px;
+  border-left: 3px solid rgba(255, 124, 156, 0.65);
+}
+
+#post .post-content h4 {
+  padding-left: 10px;
+  border-left: 3px solid rgba(255, 183, 213, 0.8);
+}
+
+/* 引用块：粉色左粗条 + 淡粉磨砂底 */
+#post .post-content blockquote {
+  margin: 1.2em 0;
+  padding: 0.8em 1em 0.8em 1.1em;
+  border-left: 4px solid #ff7c9c;
+  background: linear-gradient(90deg, rgba(255, 124, 156, 0.1), rgba(255, 124, 156, 0.02));
+  border-radius: 0 10px 10px 0;
+  color: var(--blockquote-color, #6b6b6b);
+  font-size: 0.97em;
+}
+
+#post .post-content blockquote p {
+  margin: 0.4em 0;
+}
+
+#post .post-content blockquote > p:first-child::before {
+  font-size: 1.5em;
+  color: rgba(255, 124, 156, 0.35);
+}
+
+#post .post-content blockquote > p:last-child::after {
+  color: rgba(255, 124, 156, 0.35);
+}
+
+/* 行内代码 */
+#post .post-content code:not(pre code) {
+  padding: 0.18em 0.45em;
+  margin: 0 0.1em;
+  font-size: 0.88em;
+  border-radius: 5px;
+  background: rgba(255, 124, 156, 0.12);
+  color: var(--code-foreground, #e76f8b);
+  border: 1px solid rgba(255, 124, 156, 0.18);
+}
+
+/* 代码块：更圆润、深色更耐看 */
+#post .post-content .highlight,
+#post .post-content pre {
+  border-radius: 12px !important;
+  margin: 1.3em 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+#post .post-content .highlight {
+  border: 1px solid rgba(255, 124, 156, 0.22);
+  box-shadow: 0 4px 16px rgba(255, 124, 156, 0.08);
+  background: var(--highlight-background, #2b2b2b);
+}
+
+/* 代码块滚动条更细，粉色 */
+#post .post-content .highlight pre::-webkit-scrollbar,
+#post .post-content .highlight::-webkit-scrollbar {
+  height: 6px;
+}
+
+#post .post-content .highlight pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 124, 156, 0.5);
+  border-radius: 6px;
+}
+
+/* 图片：圆角 + 柔和阴影 */
+#post .post-content img {
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14);
+  cursor: zoom-in;
+}
+
+/* 图片缩放居中 */
+#post .post-content .img-info {
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+/* 表格：粉色表头 + 斑马纹 + 溢出横向滚动 */
+#post .post-content table {
+  width: 100%;
+  margin: 1.3em 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(255, 124, 156, 0.2);
+  font-size: 0.94em;
+}
+
+#post .post-content table thead th {
+  background: linear-gradient(180deg, rgba(255, 124, 156, 0.92), rgba(255, 124, 156, 0.78));
+  color: #fff;
+  font-weight: 600;
+  padding: 0.6em 0.9em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+#post .post-content table tbody td {
+  padding: 0.55em 0.9em;
+  border-bottom: 1px solid rgba(255, 124, 156, 0.12);
+}
+
+#post .post-content table tbody tr:nth-child(even) td {
+  background: rgba(255, 124, 156, 0.05);
+}
+
+#post .post-content table tbody tr:hover td {
+  background: rgba(255, 124, 156, 0.12);
+}
+
+/* 列表标记 */
+#post .post-content ul li::marker,
+#post .post-content ol li::marker {
+  color: #ff7c9c;
+}
+
+#post .post-content ul li::marker {
+  content: "🌸 ";
+}
+
+/* 链接：粉色 hover + 下划线渐显 */
+#post .post-content a {
+  color: var(--link, #ff7c9c);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+#post .post-content a:hover {
+  color: #f772a6;
+  text-decoration: underline;
+  text-decoration-color: rgba(247, 114, 166, 0.5);
+  text-underline-offset: 3px;
+}
+
+/* 分割线：居中樱花点缀 */
+#post .post-content hr {
+  border: none;
+  height: 1px;
+  margin: 2em auto;
+  background: linear-gradient(90deg, transparent, rgba(255, 124, 156, 0.4), transparent);
+  position: relative;
+}
+
+/* 目录：粉色圆点 */
+#post .post-toc .toc-link,
+#post .post-toc li {
+  border-radius: 6px;
+}
+
+#post .post-toc a {
+  transition: color 0.2s ease, padding-left 0.2s ease;
+}
+
+#post .post-toc a:hover {
+  color: #ff7c9c;
+  padding-left: 3px;
+}
+
+/* 文章头图更圆润 */
+#post .post-cover,
+.post-wrap .post_cover {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+/* 代码复制按钮样式微调 */
+.copy-notice {
+  color: #ff7c9c !important;
+}
+
+/* 暗色模式适配 */
+html[data-theme="dark"] #post .post-content {
+  color: var(--content-body-color, #c8c8c8);
+}
+
+html[data-theme="dark"] #post .post-content blockquote {
+  background: linear-gradient(90deg, rgba(255, 124, 156, 0.14), rgba(255, 124, 156, 0.03));
+}
+
+html[data-theme="dark"] #post .post-content code:not(pre code) {
+  background: rgba(255, 124, 156, 0.16);
+  border-color: rgba(255, 124, 156, 0.25);
+}
+
+html[data-theme="dark"] #post .post-content table tbody tr:nth-child(even) td {
+  background: rgba(255, 124, 156, 0.07);
+}
+
+html[data-theme="dark"] #post .post-content table tbody tr:hover td {
+  background: rgba(255, 124, 156, 0.14);
+}

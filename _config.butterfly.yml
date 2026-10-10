@@ -1075,6 +1075,7 @@ inject:
   head:
     - <link rel="stylesheet" href="/css/splash.css?v=20261006d">
     - <link rel="stylesheet" href="/css/anime.css?v=20261006d">
+    - <link rel="stylesheet" href="/css/article.css?v=20261007b">
     - <link rel="stylesheet" href="/lib/aplayer/APlayer.min.css">
     - >-
       <script>try{if(navigator.serviceWorker){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});if(window.caches&&caches.keys){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})})}}}catch(e){}</script>
@@ -1083,7 +1084,7 @@ inject:
   bottom:
     - <script src="/js/splash.js?v=20261006d"></script>
     - <script src="/lib/aplayer/APlayer.min.js"></script>
-    - <script src="/js/bgm.js?v=20261006d"></script>
+    - <script src="/js/bgm.js?v=20261007b"></script>
     - <script src="/js/mouse-trail.js?v=20261007a"></script>
     - <script src="/js/vvm-ambient.js?v=20261007a"></script>
     - >-

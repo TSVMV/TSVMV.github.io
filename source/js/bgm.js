@@ -29,12 +29,18 @@
   ensureIndicator();
 
   var API = "https://api.injahow.cn/meting/?server=netease&type=song&id=";
+  // 所有 ID 均经 meting 接口实测可解析出可播放直链
   var SONGS = [
     "3420711343", // 琵琶曲 - DJ大大怪
     "461011",     // 恋愛サーキュレーション（恋爱循环） - 花澤香菜
     "2034742057", // アイドル（偶像） - YOASOBI
     "657680",     // 残酷な天使のテーゼ - 高橋洋子
-    "426881487"   // 前前前世 (movie ver.) - RADWIMPS
+    "426881487",  // 前前前世 (movie ver.) - RADWIMPS
+    "461005",     // Staple Stable - 斎藤千和
+    "461013",     // Sugar Sweet Nightmare - 堀江由衣
+    "461009",     // Ambivalent World - 沢城みゆき
+    "461014",     // 序章 - 神前暁
+    "404083266"   // インフィニティ - May'n
   ];
 
   Promise.all(
@@ -66,7 +72,7 @@
       autoplay: true,
       loop: "all",
       order: "list",
-      volume: 0.55,
+      volume: 0.25,
       mutex: true,
       theme: "#ff7c9c",
       audio: audios
