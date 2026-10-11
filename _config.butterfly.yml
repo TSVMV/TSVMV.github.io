@@ -781,18 +781,18 @@ site_verification:
 
 theme_color:
   enable: true
-  main: "#49B1F5"
-  paginator: "#00c4b6"
-  button_hover: "#FF7242"
-  text_selection: "#00c4b6"
+  main: "#ff7c9c"
+  paginator: "#ff8fb8"
+  button_hover: "#f772a6"
+  text_selection: "#ff8fb8"
   link_color: "#99a9bf"
   meta_color: "#858585"
-  hr_color: "#A4D8FA"
-  code_foreground: "#F47466"
+  hr_color: "#ffb7d5"
+  code_foreground: "#f772a6"
   code_background: "rgba(27, 31, 35, .05)"
-  toc_color: "#00c4b6"
-  blockquote_padding_color: "#49b1f5"
-  blockquote_background_color: "#49b1f5"
+  toc_color: "#ff7c9c"
+  blockquote_padding_color: "#ff7c9c"
+  blockquote_background_color: "#ff8fb8"
   scrollbar_color: "#49b1f5"
   meta_theme_color_light: "ffffff"
   meta_theme_color_dark: "#0d0d0d"
@@ -1085,6 +1085,7 @@ inject:
     - <script src="/js/splash.js?v=20261006d"></script>
     - <script src="/lib/aplayer/APlayer.min.js"></script>
     - <script src="/js/bgm.js?v=20261007b"></script>
+    - <script src="/js/reading-progress.js?v=20261007c"></script>
     - <script src="/js/mouse-trail.js?v=20261007a"></script>
     - <script src="/js/vvm-ambient.js?v=20261007a"></script>
     - >-
