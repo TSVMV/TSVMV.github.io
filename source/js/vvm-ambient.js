@@ -54,6 +54,25 @@
   var parts = [];
   function rand(a, b) { return a + Math.random() * (b - a); }
 
+  // 光斑预渲染精灵：启动时按 4 个颜色各建一张离屏渐变图，
+  // 运行时 drawImage（GPU 友好），避免逐帧新建 RadialGradient 造成 GC 压力
+  var BOKEH_SPRITES = [];
+  var BOKEH_SPR = 64;
+  (function buildBokeh() {
+    for (var k = 0; k < BOKEH.length; k++) {
+      var c = document.createElement("canvas");
+      c.width = c.height = BOKEH_SPR;
+      var x = c.getContext("2d");
+      var g = x.createRadialGradient(BOKEH_SPR / 2, BOKEH_SPR / 2, 0, BOKEH_SPR / 2, BOKEH_SPR / 2, BOKEH_SPR / 2);
+      g.addColorStop(0, "rgba(" + BOKEH[k] + ",1)");
+      g.addColorStop(0.55, "rgba(" + BOKEH[k] + ",0.5)");
+      g.addColorStop(1, "rgba(" + BOKEH[k] + ",0)");
+      x.fillStyle = g;
+      x.fillRect(0, 0, BOKEH_SPR, BOKEH_SPR);
+      BOKEH_SPRITES.push(c);
+    }
+  })();
+
   function spawn() {
     if (document.hidden || parts.length >= MAX) return;
     for (var i = 0; i < BATCH; i++) {
@@ -86,7 +105,7 @@
           vy: -rand(0.12, 0.38), sway: rand(0.15, 0.5),
           phase: rand(0, 6.28), vphase: rand(0.006, 0.014),
           r: rand(14, 34),
-          c: BOKEH[(Math.random() * BOKEH.length) | 0],
+          ci: (Math.random() * BOKEH.length) | 0,
           a: rand(0.05, 0.15)
         });
       } else {
@@ -163,14 +182,12 @@
         p.x += Math.sin(p.phase) * p.sway;
         p.y += p.vy;
         if (p.y < -p.r - 20) { parts.splice(i, 1); continue; }
-        var g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0, "rgba(" + p.c + "," + p.a + ")");
-        g.addColorStop(1, "rgba(" + p.c + ",0)");
+        var spr = BOKEH_SPRITES[p.ci];
+        if (!spr) continue;
         ctx.save();
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.globalAlpha = p.a;
+        var d = p.r * 2;
+        ctx.drawImage(spr, p.x - p.r, p.y - p.r, d, d);
         ctx.restore();
       } else {
         p.phase += p.vphase;
