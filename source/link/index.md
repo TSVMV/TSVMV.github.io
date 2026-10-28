@@ -30,6 +30,10 @@ type: link
       link: https://bin9chn.github.io/
       descr: Bin9chn 的网络安全研究与工程项目笔记，关注协议安全、CTF、流量分析、漏洞研究和安全工具
       avatar: https://bin9chn.github.io/images/avatar.png
+    - name: Coinsheep
+      link: https://dnjs15.github.io/
+      descr: Coinsheep 的个人技术博客，记录 Web 安全、漏洞复现与代码审计
+      avatar: https://dnjs15.github.io/img/avatar_hu_1cf48c5279a1e9a1.jpg
 {% endflink %}
 
 {% flink %}
