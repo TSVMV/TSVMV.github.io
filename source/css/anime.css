@@ -81,9 +81,10 @@
   box-shadow: 0 8px 22px rgba(255, 124, 156, 0.22);
 }
 
-/* 背景音乐播放器：按要求不可关闭 —— APlayer 原生 UI 全部隐藏，
+/* 背景音乐播放器：APlayer 原生 UI 全部隐藏，
  * 根元素白底也一并去掉（否则左下角会露出一个白色方块），
- * 用一枚会呼吸跳动的粉色音符小圆片代替（纯装饰，点不到 = 关不掉） */
+ * 用一枚会呼吸跳动的粉色音符小圆片代替。
+ * 圆片可点击 = 音乐开关：播放中跳动，暂停后变灰静止并带斜线 */
 #vmv-bgm,
 #vmv-bgm.aplayer {
   background: transparent !important;
@@ -92,6 +93,9 @@
   height: 0;
   margin: 0;
   border: none;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #vmv-bgm .aplayer-body,
@@ -119,6 +123,27 @@
   box-shadow: 0 3px 10px rgba(255, 124, 156, 0.45);
   pointer-events: none;
   animation: vmv-note-bounce 1.6s ease-in-out infinite;
+}
+
+/* 关闭态：变灰、停止跳动、加一条白色斜线 */
+#vmv-bgm.vmv-bgm-paused::after {
+  background: linear-gradient(135deg, #d6dbe1, #a9b1ba);
+  box-shadow: 0 3px 8px rgba(120, 128, 138, 0.35);
+  animation: none;
+}
+
+#vmv-bgm.vmv-bgm-paused::before {
+  content: "";
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 1000;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(to top right,
+    transparent 46%, rgba(255, 255, 255, 0.92) 46%, rgba(255, 255, 255, 0.92) 54%, transparent 54%);
+  pointer-events: none;
 }
 
 @keyframes vmv-note-bounce {

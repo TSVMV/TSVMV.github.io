@@ -3,25 +3,48 @@
  * 直链带时效签名，因此每次进站实时拉取。
  * 浏览器自动播放策略会拦截无手势的 play()：初始化试一次，
  * 若未成功，首次交互（点击/按键/滚轮/触摸）再强制播放。
- * 播放器按钮已被 anime.css 隐藏（按要求不可关闭），循环播放。
+ * 播放器按钮已被 anime.css 隐藏，循环播放；左下角音符小圆片
+ * 是可点击的开关：点击暂停/恢复，暂停时变灰静止并带斜线。
  * pjax 说明：Butterfly 站内导航会重新执行本脚本，因此把播放器
  * 实例挂在 window 上做单例——pjax 换页时 audio（不在 DOM 里）
- * 继续播放不中断，只补回被换掉的指示器容器。 */
+ * 继续播放不中断，只补回被换掉的指示器容器并重绑开关。 */
 (function () {
   "use strict";
+
+  function syncState() {
+    var p = window.__vmvBgmPlayer;
+    var c = document.getElementById("vmv-bgm");
+    if (!p || !p.audio || !c) return;
+    c.classList.toggle("vmv-bgm-paused", p.audio.paused);
+  }
 
   function ensureIndicator() {
     var c = document.getElementById("vmv-bgm");
     if (!c) {
       c = document.createElement("div");
       c.id = "vmv-bgm";
+      c.setAttribute("role", "button");
+      c.setAttribute("aria-label", "背景音乐 开/关");
+      c.title = "背景音乐 开/关";
       (document.body || document.documentElement).appendChild(c);
     }
+    if (!c.__vmvToggleBound) {
+      c.__vmvToggleBound = true;
+      c.addEventListener("click", function () {
+        var p = window.__vmvBgmPlayer;
+        if (!p || !p.audio) return;
+        try {
+          if (p.audio.paused) { p.audio.play(); } else { p.audio.pause(); }
+        } catch (e) {}
+      });
+    }
+    return c;
   }
 
-  // pjax 站内导航：音乐继续，不重建
+  // pjax 站内导航：音乐继续，不重建，只补回指示器并同步开关状态
   if (window.__vmvBgmPlayer) {
     ensureIndicator();
+    syncState();
     return;
   }
 
@@ -78,6 +101,11 @@
       audio: audios
     });
     window.__vmvBgmPlayer = player;
+
+    // 开关状态跟随 audio 原生事件，避免依赖 APlayer 版本差异
+    player.audio.addEventListener("play", syncState);
+    player.audio.addEventListener("pause", syncState);
+    syncState();
 
     function play() {
       try { player.play(); } catch (e) {}
