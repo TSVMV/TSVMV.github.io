@@ -26,6 +26,10 @@ type: link
       link: https://keeygeen.cn
       descr: 喵喵喵~ 喜欢折腾
       avatar: https://keeygeen.cn/uploads/1785470476676_e711e358.jpg
+    - name: Bin9chn
+      link: https://bin9chn.github.io/
+      descr: Bin9chn 的网络安全研究与工程项目笔记，关注协议安全、CTF、流量分析、漏洞研究和安全工具
+      avatar: https://bin9chn.github.io/images/avatar.png
 {% endflink %}
 
 {% flink %}
