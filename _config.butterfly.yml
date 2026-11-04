@@ -283,7 +283,7 @@ footer:
   copyright:
     enable: false
     version: false
-  custom_text: '<p>© 2026 VMV | 抖音: VMV_SRC | QQ: VMVflag | 邮箱: 3347123386@qq.com</p><p class="vmv-footer-links"><span class="vmv-footer-title">LINKS</span> ─ <a href="/link/">友链索引</a> · 想换友链走 <a href="/link/">申请流程</a></p><p class="vmv-footer-term">▶ SYSTEM_ONLINE <span class="vmv-term-cursor">▮</span></p>'
+  custom_text: '<p>© 2026 VMV | 抖音: VMV_SRC | QQ: VMVflag | 邮箱: 3347123386@qq.com</p><p class="vmv-footer-links"><span class="vmv-footer-title">LINKS</span> ─ <a href="/link/">友链索引</a> · 想换友链走 <a href="/link/">申请流程</a></p><p class="vmv-footer-term">▶ SYSTEM_ONLINE <span class="vmv-term-cursor">▮</span></p><p><a href="https://icp.h-acker.cc/?keyword=20265555" target="_blank" rel="noopener">HackICP备20265555号</a></p>'
 
 # --------------------------------------
 # Aside Settings
