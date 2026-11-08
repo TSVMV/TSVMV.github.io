@@ -6,7 +6,6 @@ tags: [CTF, WP, LRTCTF, 逆向, Pwn, Web]
 cover: /img/lrtctf-cover.jpg
 ---
 
-打了一整场 LRTCTF2026，21 题基本都做穿了，题目分布挺杂——Crypto、Reverse、Misc、Web、Pwn、AI 对抗、OSINT 都有。这篇把每题的过程摊开写，代码和命令都是当时用的原样。
 
 ## 目录
 
@@ -40,9 +39,9 @@ cover: /img/lrtctf-cover.jpg
 
 ## 1. 口算
 
-这题没什么好想的。rsa.py 把 p=61、q=53、e=17 全给了，第 8 行明写着 `m = 65`，连求 `m` 的步骤都省了，拿私钥直接解一遍验证一下就行。
+rsa.py 把 p=61、q=53、e=17 全给了，第 8 行明写着 `m = 65`，
 
-exp：
+exp:
 
 ```python
 p, q, e, m = 61, 53, 17, 65
@@ -96,6 +95,7 @@ assert x == c0 and icbrt(x) ** 3 == x
 ```
 
 输出 `b'lrtctf{h4st4d_br0adc4st_1s_n0t_s4fe}'`。
+![silent-broadcast](/img/lrtctf/silent-broadcast.png)
 
 ```
 flag:lrtctf{h4st4d_br0adc4st_1s_n0t_s4fe}
@@ -205,6 +205,7 @@ print(flag)
 ```
 
 `lrtctf{XiaoSiGame}`。
+![goback](/img/lrtctf/goback.png)
 
 ```
 flag:lrtctf{XiaoSiGame}
@@ -410,6 +411,8 @@ diffs = [-6,17,14,4,-7,-12,8,-13,-2,-17,-23]
 print("".join(chr((s+d)//2) + chr((s-d)//2) for s, d in zip(sums, diffs)))
 ```
 
+![math-master](/img/lrtctf/math-master.png)
+
 ```
 lrtctf{welcome_lrtctf}
 ```
@@ -476,7 +479,7 @@ strncmp(s + 7, md5hex, 32) == 0   // 即 flag = lrtctf{md5hex}
 
 ## 6. 签到题
 
-签到处的二维码扫出来就是这串，直接交。
+![signin](/img/lrtctf/signin.png)
 
 ```
 lrtctf{w3lc0m_T0_1@pr15kt3am}
@@ -488,7 +491,7 @@ Misc（隐写 / 文件拼接），附件 `girl.zip`。
 
 解压只有一张 `girl.png`。文件名是 png，文件头是 JPEG 的 `FF D8 FF E0`（JFIF），末尾又是 PNG 的 `IEND`。前面一张 jpg，`FF D9` 后面再拼一张 png。
 
-在 `0xFFD9` 前面能扫到 `lrtctf{hint!flag}`，一眼假，flag 不在这层图上。
+在 `0xFFD9` 前面能扫到 `lrtctf{hint!flag}`，不对，flag 不在这层图上。
 
 exp 按文件头自动切开再解二维码：
 
@@ -525,7 +528,7 @@ lrtctf{139e1603741c4ffb4a88a7776d79ab6f}
 
 ## 15. 听音
 
-Misc（音频 Morse），附件 `morse_noisy.wav`（44100 Hz / 16bit / 单声道 / 36.6s），带噪的 800 Hz 音频摩尔斯。
+Misc（音频莫尔斯），附件 `morse_noisy.wav`（44100 Hz / 16bit / 单声道 / 36.6s），带噪的 800 Hz 音频摩尔斯。
 
 ### 打法
 
@@ -563,7 +566,9 @@ flag:lrtctf{04420FEED1585E1A5688C4867CE103C3}
 
 附件 model.py / model.pt / sample.png。页面规则：往 /api/submit 提交一张图，要求 ① 模型预测为"根号49"；② 和基准图 sample.png的 L∞ 扰动 ≤ 0.35。另有 /api/predict 可以随便调试。模型是 MNIST 分类 CNN，权重直接给——白盒定向对抗样本。
 
+```
 完整 exp：
+```
 
 ```python
 # exp
@@ -680,7 +685,7 @@ for m in re.finditer(rb'([A-Za-z]+)="([A-Za-z0-9+/=]{8,})"', raw):
         pass
 ```
 
-拼 flag 的格式按示例来：`重庆_四川成都` 这个例子说明直辖市不带省名、地级市带省名，所以葫芦岛写全"辽宁葫芦岛"。
+拼 flag 抄示例：`重庆_四川成都` 这个例子说明直辖市不带省名、地级市带省名，所以葫芦岛写全"辽宁葫芦岛"。
 
 ```
 lrtctf{辽宁葫芦岛_天津_2026/8/23_0911}
@@ -792,21 +797,29 @@ flag:lrtctf{f08540829e577d6517b4ecf60de8e79a}
 
 ## 11. CronHub
 
-Web（Node.js 原型链污染 → NODE_OPTIONS 命令注入）。这题后半段全是浏览器手工点的，思路很直：先靠 `__proto__` 把 `isAdmin` 污染进去骗过后台鉴权，再往 `NODE_OPTIONS` 里塞 `--require` 挂自己的脚本，让下次任务执行时把 `/flag` 读回来。
-
 1. 首页配置框填 `{"constructor":{"prototype":{"isAdmin":true}}}`，点「更新配置」——响应里 `config` 直接多出 `"isAdmin":true`：JSON 序列化把原型上的新属性带了出来，污染成功的活证据。
+
+![cronhub-1](/img/lrtctf/cronhub-1.png)
 
 2. 点右上角「管理后台」——「✔ 管理员身份验证通过」，后台页面自己都把 `child_process.spawn` 提示出来了。
 
+![cronhub-2](/img/lrtctf/cronhub-2.png)
+
 3. 回首页配置框填 NODE_OPTIONS 污染（浏览器里引号原样写，没有 shell 转义问题）：
 
+![cronhub-3](/img/lrtctf/cronhub-3.png)
+
 4. 点「运行任务」，输出区直接回传 `/flag`：
+
+![cronhub-4](/img/lrtctf/cronhub-4.png)
+
 
 flag：`lrtctf{NoD3_jS_?_02d2495388ac}`
 
 ## 12. Lrtmall
 
 Web / ⭐☆☆☆☆，动态容器。LAP 酱开了个商城卖商品，说可以来挑心仪的 flag。
+![lrtmall](/img/lrtctf/lrtmall.png)
 
 首页商品图不是写死在 img 标签里的，翻 JS 看到 `POST /load_image`，参数就一个 `filename=phone.png`——文件名直接进读取函数，不用犹豫，先试穿越。服务端逻辑（`../../app.py` 读出来确认的）是 `path = IMAGE_DIR + "/" + filename`，只拦 `/` 开头的绝对路径和 `\x00`，`..` 完全没过滤。图片目录 /app/static/images：`../app.py` 差一级 404，`../../app.py` 直接把 Flask 源码吐出来；源码里没 flag，再多跳一级 `../../../flag` 命中。
 
@@ -840,19 +853,19 @@ Web / ⭐⭐⭐⭐，动态容器实例，flag 在 `/root/flag`。链路：弱 J
 
 1. 首页发 `role:user` 的 JWT，`/admin/` 403 拦截：
 
-（截图：`/admin/` 返回 403。）
+![labops-403](/img/lrtctf/labops-403.png)
 
 2. 离线爆破 HS256 得弱密钥 `secret`，重签 `role:admin`。原 Cookie 是 HttpOnly 覆盖不掉——浏览器控制台写一条 `path=/admin` 的同名 Cookie（更长路径优先发送，PHP 取第一个），伪造身份进管理台「通知模板」：
 
-（截图：伪造 admin 的 Cookie 后进了管理台。）
+![labops-admin](/img/lrtctf/labops-admin.png)
 
 3. 「通知模板」= Twig 盲 SSTI。坑：表单 `action="/admin"` 少尾斜杠，POST 被 Apache 301 打成 GET、模板根本没送达——控制台 `document.forms[0].action='/admin/'` 修正后再提交。`{{["id > /var/www/html/uploads/id.txt 2>&1"]|map('system')}}` 落盘，打开 `/uploads/id.txt` 见 `uid=33(www-data)`，回显通道打通：
 
-（截图：`id` 回显 `uid=33(www-data)`，RCE 通道成立。）
+![labops-rce](/img/lrtctf/labops-rce.png)
 
 4. SUID `/usr/local/bin/logclean` 黑名单漏 `$()`，`${IFS}` 代替空格，两连击：cp `/root/flag` 进 uploads、再 chmod 644，浏览器直接读 `/uploads/flag.txt`：
 
-（截图：浏览器直接打开 `/uploads/flag.txt` 拿到 flag。）
+![labops-flag](/img/lrtctf/labops-flag.png)
 
 ```
 flag:lrtctf{96cc3418-f1cd-4bd1-98ca-bb8b1f855ba3}
@@ -988,6 +1001,8 @@ curl 拉取问卷页面（标题"LRTCTF2026决赛问卷"），**flag 就藏在�
 ```
 
 **知识点**：二维码解码一步到位，真正的考点是"扫码 → 访问问卷 → 直接翻问卷页面源码"，flag 在问卷描述字段而非答题流程里。
+
+
 
 ## 21. 工厂零信任数仓（Reverse · ⭐⭐⭐⭐⭐ · 500pts）
 
